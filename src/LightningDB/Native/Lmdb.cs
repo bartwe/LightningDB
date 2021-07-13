@@ -1,54 +1,37 @@
 ﻿using System;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace LightningDB.Native
-{
-    public static class Lmdb
-    {
-        private const string MDB_DLL_NAME = "lmdb";
-        /// <summary>
-        /// Duplicate keys may be used in the database. (Or, from another perspective, keys may have multiple data items, stored in sorted order.) By default keys must be unique and may have only a single data item.
-        /// </summary>
-        public const int MDB_DUPSORT = 0x04;
+namespace LightningDB.Native {
+    public static class Lmdb {
+        const string MDB_DLL_NAME = "lmdb";
 
-        /// <summary>
-        /// This flag may only be used in combination with MDB_DUPSORT. This option tells the library that the data items for this database are all the same size, which allows further optimizations in storage and retrieval. When all data items are the same size, the MDB_GET_MULTIPLE and MDB_NEXT_MULTIPLE cursor operations may be used to retrieve multiple items at once.
-        /// </summary>
-        public const int MDB_DUPFIXED = 0x10;
-
-        public static MDBResultCode mdb_env_set_mapsize(IntPtr env, long size)
-        {
+        public static MDBResultCode mdb_env_set_mapsize(IntPtr env, long size) {
             return mdb_env_set_mapsize(env, new IntPtr(size));
         }
 
-        public static MDBResultCode mdb_put(IntPtr txn, uint dbi, MDBValue key, MDBValue value, PutOptions flags)
-        {
+        public static MDBResultCode mdb_put(IntPtr txn, uint dbi, MDBValue key, MDBValue value, PutOptions flags) {
             return mdb_put(txn, dbi, ref key, ref value, flags);
         }
 
-        public static MDBResultCode mdb_del(IntPtr txn, uint dbi, MDBValue key, MDBValue value)
-        {
+        public static MDBResultCode mdb_del(IntPtr txn, uint dbi, MDBValue key, MDBValue value) {
             return mdb_del(txn, dbi, ref key, ref value);
         }
 
-        public static MDBResultCode mdb_del(IntPtr txn, uint dbi, MDBValue key)
-        {
+        public static MDBResultCode mdb_del(IntPtr txn, uint dbi, MDBValue key) {
             return mdb_del(txn, dbi, ref key, IntPtr.Zero);
         }
 
-        public static MDBResultCode mdb_cursor_put(IntPtr cursor, MDBValue key, MDBValue value, CursorPutOptions flags)
-        {
+        public static MDBResultCode mdb_cursor_put(IntPtr cursor, MDBValue key, MDBValue value, CursorPutOptions flags) {
             return mdb_cursor_put(cursor, ref key, ref value, flags);
         }
 
         /// <summary>
-        /// store multiple contiguous data elements in a single request.
-        /// May only be used with MDB_DUPFIXED.
+        ///     store multiple contiguous data elements in a single request.
+        ///     May only be used with MDB_DUPFIXED.
         /// </summary>
         /// <param name="data">This span must be pinned or stackalloc memory</param>
-        public static MDBResultCode mdb_cursor_put(IntPtr cursor, ref MDBValue key, ref Span<MDBValue> data,
-            CursorPutOptions flags)
-        {
+        public static MDBResultCode mdb_cursor_put(IntPtr cursor, ref MDBValue key, ref Span<MDBValue> data, CursorPutOptions flags) {
             ref var dataRef = ref MemoryMarshal.GetReference(data);
             return mdb_cursor_put(cursor, ref key, ref dataRef, flags);
         }
@@ -60,8 +43,7 @@ namespace LightningDB.Native
         public static extern void mdb_env_close(IntPtr env);
 
         [DllImport(MDB_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern MDBResultCode mdb_env_open(IntPtr env, string path, EnvironmentOpenFlags flags,
-            UnixAccessMode mode);
+        internal static extern MDBResultCode mdb_env_open(IntPtr env, string path, EnvironmentOpenFlags flags, UnixAccessMode mode);
 
         [DllImport(MDB_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern MDBResultCode mdb_env_set_mapsize(IntPtr env, IntPtr size);
@@ -159,24 +141,14 @@ namespace LightningDB.Native
         [DllImport(MDB_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern MDBResultCode mdb_set_dupsort(IntPtr txn, uint dbi, CompareFunction cmp);
 
-        [DllImport(MDB_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern MDBResultCode mdb_cursor_put(IntPtr cursor, ref MDBValue key, MDBValue[] value, CursorPutOptions flags);
-
-#if NETCOREAPP3_1 || NET5_0
-
-        public static void LoadWindowsAutoResizeLibrary()
-        {
-            NativeLibrary.SetDllImportResolver(System.Reflection.Assembly.GetExecutingAssembly(), DllImportResolver);
+        public static void LoadWindowsAutoResizeLibrary() {
+            NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), DllImportResolver);
         }
-        
-        private static IntPtr DllImportResolver(string libraryName, System.Reflection.Assembly assembly, DllImportSearchPath? searchPath)
-        {
+
+        static IntPtr DllImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath) {
             if (libraryName == MDB_DLL_NAME)
-            {
                 return NativeLibrary.Load($"{MDB_DLL_NAME}autoresize", assembly, searchPath);
-            }
             return IntPtr.Zero;
         }
-#endif
     }
 }

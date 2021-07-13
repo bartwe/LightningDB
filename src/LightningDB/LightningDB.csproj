@@ -1,16 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>LightningDB</Description>
-    <VersionPrefix>0.13.0</VersionPrefix>
     <Authors>Ilya Lukyanov;Corey Kaylor</Authors>
-    <TargetFrameworks>netstandard2.0;netcoreapp3.1;net5.0</TargetFrameworks>
+    <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>LightningDB</AssemblyName>
-    <PackageId>LightningDB</PackageId>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageTags>lmdb;lightning;storage;persistance;key-value;nosql</PackageTags>
-    <PackageProjectUrl>https://github.com/CoreyKaylor/Lightning.NET</PackageProjectUrl>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
   </PropertyGroup>
   
   <ItemGroup>

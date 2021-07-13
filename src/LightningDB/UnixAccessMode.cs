@@ -1,61 +1,59 @@
 ﻿using System;
 
-namespace LightningDB
-{
+namespace LightningDB {
     /// <summary>
-    /// Unix file access privileges
+    ///     Unix file access privileges
     /// </summary>
     [Flags]
-    public enum UnixAccessMode : uint
-    {
+    public enum UnixAccessMode : uint {
         /// <summary>
-        /// S_IRUSR
+        ///     S_IRUSR
         /// </summary>
         OwnerRead = 0x0100,
 
         /// <summary>
-        /// S_IWUSR
+        ///     S_IWUSR
         /// </summary>
-        OwnerWrite = 0x0080, 
+        OwnerWrite = 0x0080,
 
         /// <summary>
-        /// S_IXUSR
+        ///     S_IXUSR
         /// </summary>
-        OwnerExec = 0x0040, 
+        OwnerExec = 0x0040,
 
         /// <summary>
-        /// S_IRGRP
+        ///     S_IRGRP
         /// </summary>
         GroupRead = 0x0020,
 
         /// <summary>
-        /// S_IWGRP
+        ///     S_IWGRP
         /// </summary>
         GroupWrite = 0x0010,
 
         /// <summary>
-        /// S_IXGRP
+        ///     S_IXGRP
         /// </summary>
-        GroupExec = 0x0008, 
+        GroupExec = 0x0008,
 
         /// <summary>
-        /// S_IROTH
+        ///     S_IROTH
         /// </summary>
-        OtherRead = 0x0004, 
+        OtherRead = 0x0004,
 
         /// <summary>
-        /// S_IWOTH
+        ///     S_IWOTH
         /// </summary>
-        OtherWrite = 0x0002, 
+        OtherWrite = 0x0002,
 
         /// <summary>
-        /// S_IXOTH
+        ///     S_IXOTH
         /// </summary>
         OtherExec = 0x0001,
 
         /// <summary>
-        /// Owner, Group, Other Read/Write
+        ///     Owner, Group, Other Read/Write
         /// </summary>
-        Default = OwnerRead | OwnerWrite | GroupRead | GroupWrite | OtherRead | OtherWrite
+        Default = OwnerRead | OwnerWrite | GroupRead | GroupWrite | OtherRead | OtherWrite,
     }
 }

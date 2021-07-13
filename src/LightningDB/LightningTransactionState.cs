@@ -1,28 +1,26 @@
-﻿namespace LightningDB
-{
+﻿namespace LightningDB {
     /// <summary>
-    /// Transaction state.
+    ///     Transaction state.
     /// </summary>
-    public enum LightningTransactionState
-    {
+    public enum LightningTransactionState {
         /// <summary>
-        /// Transaction is currently active.
+        ///     Transaction is currently active.
         /// </summary>
         Active,
 
         /// <summary>
-        /// Transaction is currently reseted.
+        ///     Transaction is currently reseted.
         /// </summary>
         Reseted,
 
         /// <summary>
-        /// Transaction is aborted.
+        ///     Transaction is aborted.
         /// </summary>
         Aborted,
 
         /// <summary>
-        /// Transaction is commited.
+        ///     Transaction is commited.
         /// </summary>
-        Commited
+        Commited,
     }
 }

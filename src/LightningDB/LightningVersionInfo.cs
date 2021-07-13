@@ -1,46 +1,35 @@
 ﻿using System.Runtime.InteropServices;
 using static LightningDB.Native.Lmdb;
 
-namespace LightningDB
-{
+namespace LightningDB {
     /// <summary>
-    /// Represents lmdb version information.
+    ///     Represents lmdb version information.
     /// </summary>
-    public class LightningVersionInfo
-    {
-        internal static LightningVersionInfo Get()
-        {
+    public struct LightningVersionInfo {
+        internal static LightningVersionInfo Get() {
             var version = mdb_version(out var major, out var minor, out var patch);
-            return new LightningVersionInfo
-            {
-                Version = Marshal.PtrToStringAnsi(version),
-                Major = major,
-                Minor = minor,
-                Patch = patch
+            return new() {
+                Version = Marshal.PtrToStringAnsi(version), Major = major, Minor = minor, Patch = patch,
             };
         }
 
-        private LightningVersionInfo()
-        {
-        }
-
         /// <summary>
-        /// Major version number.
+        ///     Major version number.
         /// </summary>
         public int Major { get; private set; }
 
         /// <summary>
-        /// Minor version number.
+        ///     Minor version number.
         /// </summary>
         public int Minor { get; private set; }
 
         /// <summary>
-        /// Patch version number.
+        ///     Patch version number.
         /// </summary>
         public int Patch { get; private set; }
 
         /// <summary>
-        /// Version string.
+        ///     Version string.
         /// </summary>
         public string Version { get; private set; }
     }

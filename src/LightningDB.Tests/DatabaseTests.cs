@@ -2,47 +2,40 @@
 using Xunit;
 using static System.Text.Encoding;
 
-namespace LightningDB.Tests
-{
+namespace LightningDB.Tests {
     [Collection("SharedFileSystem")]
-    public class DatabaseTests : IDisposable
-    {
-        private LightningEnvironment _env;
-        private LightningTransaction _txn;
-
-        public DatabaseTests(SharedFileSystem fileSystem)
-        {
+    public class DatabaseTests : IDisposable {
+        public DatabaseTests(SharedFileSystem fileSystem) {
             var path = fileSystem.CreateNewDirectoryForTest();
-            _env = new LightningEnvironment(path);
+            _env = new(path);
         }
 
-        public void Dispose()
-        {
+        public void Dispose() {
             _env.Dispose();
         }
-        
+
+        readonly LightningEnvironment _env;
+        LightningTransaction _txn;
+
         [Fact]
-        public void DatabaseShouldBeCreated()
-        {
-            var dbName = "test";
-            _env.MaxDatabases = 2;
+        public void DatabaseFromCommitedTransactionShouldBeAccessable() {
             _env.Open();
-            using (var txn = _env.BeginTransaction())
-            using (txn.OpenDatabase(dbName, new DatabaseConfiguration { Flags = DatabaseOpenFlags.Create }))
-            {
-                txn.Commit();
+
+            LightningDatabase db;
+            using (var committed = _env.BeginTransaction()) {
+                db = committed.OpenDatabase();
+                committed.Commit();
             }
-            using (var txn = _env.BeginTransaction())
-            using (var db = txn.OpenDatabase(dbName, new DatabaseConfiguration { Flags = DatabaseOpenFlags.None }))
-            {
-                Assert.False(db.IsReleased);
+
+            using (db)
+            using (var txn = _env.BeginTransaction()) {
+                txn.Put(db, "key", 1.ToString());
                 txn.Commit();
             }
         }
 
         [Fact]
-        public void DatabaseShouldBeClosed()
-        {
+        public void DatabaseShouldBeClosed() {
             _env.Open();
             _txn = _env.BeginTransaction();
             var db = _txn.OpenDatabase();
@@ -53,82 +46,26 @@ namespace LightningDB.Tests
         }
 
         [Fact]
-        public void DatabaseFromCommitedTransactionShouldBeAccessable()
-        {
+        public void DatabaseShouldBeCreated() {
+            var dbName = "test";
+            _env.MaxDatabases = 2;
             _env.Open();
-
-            LightningDatabase db;
-            using (var committed = _env.BeginTransaction())
-            {
-                db = committed.OpenDatabase();
-                committed.Commit();
-            }
-
-            using (db)
             using (var txn = _env.BeginTransaction())
-            {
-                txn.Put(db, "key", 1.ToString());
+            using (txn.OpenDatabase(dbName, new() { Flags = DatabaseOpenFlags.Create }))
+                txn.Commit();
+            using (var txn = _env.BeginTransaction())
+            using (var db = txn.OpenDatabase(dbName, new() { Flags = DatabaseOpenFlags.None })) {
+                Assert.False(db.IsReleased);
                 txn.Commit();
             }
         }
 
         [Fact]
-        public void NamedDatabaseNameExistsInMaster()
-        {
-            _env.MaxDatabases = 2;
-            _env.Open();
-
-            using (var tx = _env.BeginTransaction())
-            {
-                var db = tx.OpenDatabase("customdb", new DatabaseConfiguration {Flags = DatabaseOpenFlags.Create});
-                tx.Commit();
-            }
-            using (var tx = _env.BeginTransaction())
-            {
-                var db = tx.OpenDatabase();
-                using (var cursor = tx.CreateCursor(db))
-                {
-                    cursor.Next();
-                    Assert.Equal("customdb", UTF8.GetString(cursor.GetCurrent().key.CopyToNewArray()));
-                }
-            }
-        }
-
-        [Fact]
-        public void ReadonlyTransactionOpenedDatabasesDontGetReused()
-        {
-            //This is here to assert that previous issues with the way manager
-            //classes (since removed) worked don't happen anymore.
-            _env.MaxDatabases = 2;
-            _env.Open();
-
-            using (var tx = _env.BeginTransaction())
-            using (var db = tx.OpenDatabase("custom", new DatabaseConfiguration { Flags = DatabaseOpenFlags.Create }))
-            {
-                tx.Put(db, "hello", "world");
-                tx.Commit();
-            }
-            using (var tx = _env.BeginTransaction(TransactionBeginFlags.ReadOnly))
-            {
-                var db = tx.OpenDatabase("custom");
-                var result = tx.Get(db, "hello");
-                Assert.Equal("world", result);
-            }
-            using (var tx = _env.BeginTransaction(TransactionBeginFlags.ReadOnly))
-            {
-                var db = tx.OpenDatabase("custom");
-                var result = tx.Get(db, "hello");
-                Assert.Equal("world", result);
-            }
-        }
-
-        [Fact]
-        public void DatabaseShouldBeDropped()
-        {
+        public void DatabaseShouldBeDropped() {
             _env.MaxDatabases = 2;
             _env.Open();
             _txn = _env.BeginTransaction();
-            var db = _txn.OpenDatabase("notmaster", new DatabaseConfiguration {Flags = DatabaseOpenFlags.Create});
+            var db = _txn.OpenDatabase("notmaster", new() { Flags = DatabaseOpenFlags.Create });
             _txn.Commit();
             _txn.Dispose();
             db.Dispose();
@@ -148,8 +85,50 @@ namespace LightningDB.Tests
         }
 
         [Fact]
-        public void TruncatingTheDatabase()
-        {
+        public void NamedDatabaseNameExistsInMaster() {
+            _env.MaxDatabases = 2;
+            _env.Open();
+
+            using (var tx = _env.BeginTransaction()) {
+                var db = tx.OpenDatabase("customdb", new() { Flags = DatabaseOpenFlags.Create });
+                tx.Commit();
+            }
+            using (var tx = _env.BeginTransaction()) {
+                var db = tx.OpenDatabase();
+                using (var cursor = tx.CreateCursor(db)) {
+                    var resultCode = cursor.Next();
+                    Assert.Equal(MDBResultCode.Success, resultCode);
+                    Assert.Equal("customdb", UTF8.GetString(cursor.GetCurrent().key.AsSpan().ToArray()));
+                }
+            }
+        }
+
+        [Fact]
+        public void ReadonlyTransactionOpenedDatabasesDontGetReused() {
+            //This is here to assert that previous issues with the way manager
+            //classes (since removed) worked don't happen anymore.
+            _env.MaxDatabases = 2;
+            _env.Open();
+
+            using (var tx = _env.BeginTransaction())
+            using (var db = tx.OpenDatabase("custom", new() { Flags = DatabaseOpenFlags.Create })) {
+                tx.Put(db, "hello", "world");
+                tx.Commit();
+            }
+            using (var tx = _env.BeginTransaction(TransactionBeginFlags.ReadOnly)) {
+                var db = tx.OpenDatabase("custom");
+                var result = tx.Get(db, "hello");
+                Assert.Equal("world", result);
+            }
+            using (var tx = _env.BeginTransaction(TransactionBeginFlags.ReadOnly)) {
+                var db = tx.OpenDatabase("custom");
+                var result = tx.Get(db, "hello");
+                Assert.Equal("world", result);
+            }
+        }
+
+        [Fact]
+        public void TruncatingTheDatabase() {
             _env.Open();
             _txn = _env.BeginTransaction();
             var db = _txn.OpenDatabase();

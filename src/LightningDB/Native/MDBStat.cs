@@ -1,39 +1,37 @@
 ﻿using System;
 
-namespace LightningDB.Native
-{
+namespace LightningDB.Native {
     /// <summary>
-    /// Statistics for a database in the environment. 
+    ///     Statistics for a database in the environment.
     /// </summary>
-    public struct MDBStat
-    {
+    public struct MDBStat {
         /// <summary>
-        /// Size of a database page. This is currently the same for all databases.
+        ///     Size of a database page. This is currently the same for all databases.
         /// </summary>
         public uint ms_psize;
 
         /// <summary>
-        /// Depth (height) of the B-tree
+        ///     Depth (height) of the B-tree
         /// </summary>
         public uint ms_depth;
 
         /// <summary>
-        /// Number of internal (non-leaf) pages
+        ///     Number of internal (non-leaf) pages
         /// </summary>
         public IntPtr ms_branch_pages;
 
         /// <summary>
-        /// Number of leaf pages
+        ///     Number of leaf pages
         /// </summary>
         public IntPtr ms_leaf_pages;
 
         /// <summary>
-        /// Number of overflow pages
+        ///     Number of overflow pages
         /// </summary>
         public IntPtr ms_overflow_pages;
 
         /// <summary>
-        /// Number of data items
+        ///     Number of data items
         /// </summary>
         public IntPtr ms_entries;
     }
