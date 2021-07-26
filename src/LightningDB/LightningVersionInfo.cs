@@ -9,7 +9,7 @@ namespace LightningDB {
         internal static LightningVersionInfo Get() {
             var version = mdb_version(out var major, out var minor, out var patch);
             return new() {
-                Version = Marshal.PtrToStringAnsi(version), Major = major, Minor = minor, Patch = patch,
+                Version = Marshal.PtrToStringAnsi(version) ?? "", Major = major, Minor = minor, Patch = patch,
             };
         }
 

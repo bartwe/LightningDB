@@ -3,43 +3,46 @@
     ///     Basic environment configuration
     /// </summary>
     public sealed class EnvironmentConfiguration {
-        long? _mapSize;
-        int? _maxReaders;
-        int? _maxDatabases;
+        private long? _mapSize;
+        private int? _maxReaders;
+        private int? _maxDatabases;
+
+        private bool? _autoResizeWindows;
 
         public long MapSize {
-            get { return _mapSize ?? 0; }
-            set { _mapSize = value; }
+            get => _mapSize ?? 0;
+            set => _mapSize = value;
         }
 
         public int MaxReaders {
-            get { return _maxReaders ?? 0; }
-            set { _maxReaders = value; }
+            get => _maxReaders ?? 0;
+            set => _maxReaders = value;
         }
 
         public int MaxDatabases {
-            get { return _maxDatabases ?? 0; }
-            set { _maxDatabases = value; }
+            get => _maxDatabases ?? 0;
+            set => _maxDatabases = value;
         }
 
         public bool AutoReduceMapSizeIn32BitProcess { get; set; }
 
-        internal void Configure(LightningEnvironment env) {
-            if (_mapSize.HasValue)
-                env.MapSize = _mapSize.Value;
-
-            if (_maxDatabases.HasValue)
-                env.MaxDatabases = _maxDatabases.Value;
-
-            if (_maxReaders.HasValue)
-                env.MaxReaders = _maxReaders.Value;
+        public bool AutoResizeWindows {
+            get => _autoResizeWindows ?? false;
+            set => _autoResizeWindows = value;
         }
 
-        bool? _autoResizeWindows;
+        internal void Configure(LightningEnvironment env) {
+            if (_mapSize.HasValue) {
+                env.MapSize = _mapSize.Value;
+            }
 
-        public bool AutoResizeWindows {
-            get { return _autoResizeWindows ?? false; }
-            set { _autoResizeWindows = value; }
+            if (_maxDatabases.HasValue) {
+                env.MaxDatabases = _maxDatabases.Value;
+            }
+
+            if (_maxReaders.HasValue) {
+                env.MaxReaders = _maxReaders.Value;
+            }
         }
     }
 }

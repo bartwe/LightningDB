@@ -7,32 +7,30 @@ namespace LightningDB {
     ///     LMDB Environment.
     /// </summary>
     public sealed class LightningEnvironment : IDisposable {
-        readonly EnvironmentConfiguration _config = new();
+        private readonly EnvironmentConfiguration _config = new();
 
-        IntPtr _handle;
+        private IntPtr _handle;
 
         /// <summary>
         ///     Creates a new instance of LightningEnvironment.
         /// </summary>
         /// <param name="path">Directory for storing database files.</param>
         /// <param name="configuration">Configuration for the environment.</param>
-        public LightningEnvironment(string path, EnvironmentConfiguration configuration = null) {
-            if (string.IsNullOrWhiteSpace(path))
+        public LightningEnvironment(string path, EnvironmentConfiguration configuration = null!) {
+            if (string.IsNullOrWhiteSpace(path)) {
                 throw new ArgumentException("Invalid directory name");
+            }
 
             var config = configuration ?? _config;
-            if (config.AutoResizeWindows)
+            if (config.AutoResizeWindows) {
                 LoadWindowsAutoResizeLibrary();
+            }
 
             mdb_env_create(out _handle).ThrowOnError();
             config.Configure(this);
             _config = config;
 
             Path = path;
-        }
-
-        public IntPtr Handle() {
-            return _handle;
         }
 
         /// <summary>
@@ -43,9 +41,7 @@ namespace LightningDB {
         /// <summary>
         ///     Current lmdb version.
         /// </summary>
-        public LightningVersionInfo Version {
-            get { return LightningVersionInfo.Get(); }
-        }
+        public LightningVersionInfo Version => LightningVersionInfo.Get();
 
 
         /// <summary>
@@ -62,15 +58,18 @@ namespace LightningDB {
         ///     the current size of the used space.
         /// </remarks>
         public long MapSize {
-            get { return _config.MapSize; }
+            get => _config.MapSize;
             set {
-                if (value == _config.MapSize)
+                if (value == _config.MapSize) {
                     return;
+                }
 
-                if (_config.AutoReduceMapSizeIn32BitProcess && IntPtr.Size == 4)
+                if (_config.AutoReduceMapSizeIn32BitProcess && IntPtr.Size == 4) {
                     _config.MapSize = int.MaxValue;
-                else
+                }
+                else {
                     _config.MapSize = value;
+                }
 
                 mdb_env_set_mapsize(_handle, _config.MapSize).ThrowOnError();
             }
@@ -82,13 +81,14 @@ namespace LightningDB {
         public int MaxReaders {
             get {
                 mdb_env_get_maxreaders(_handle, out var readers).ThrowOnError();
-                return (int) readers;
+                return (int)readers;
             }
             set {
-                if (IsOpened)
+                if (IsOpened) {
                     throw new InvalidOperationException("Can't change MaxReaders of opened environment");
+                }
 
-                mdb_env_set_maxreaders(_handle, (uint) value).ThrowOnError();
+                mdb_env_set_maxreaders(_handle, (uint)value).ThrowOnError();
 
                 _config.MaxReaders = value;
             }
@@ -101,15 +101,17 @@ namespace LightningDB {
         ///     This function may only be called before the environment is opened.
         /// </summary>
         public int MaxDatabases {
-            get { return _config.MaxDatabases; }
+            get => _config.MaxDatabases;
             set {
-                if (IsOpened)
+                if (IsOpened) {
                     throw new InvalidOperationException("Can't change MaxDatabases of opened environment");
+                }
 
-                if (value == _config.MaxDatabases)
+                if (value == _config.MaxDatabases) {
                     return;
+                }
 
-                mdb_env_set_maxdbs(_handle, (uint) value).ThrowOnError();
+                mdb_env_set_maxdbs(_handle, (uint)value).ThrowOnError();
 
                 _config.MaxDatabases = value;
             }
@@ -148,14 +150,31 @@ namespace LightningDB {
         public string Path { get; }
 
         /// <summary>
+        ///     Dispose the environment and release the memory map.
+        ///     Only a single thread may call this function. All transactions, databases, and cursors must already be closed before
+        ///     calling this function.
+        ///     Attempts to use any such handles after calling this function will cause a SIGSEGV.
+        ///     The environment handle will be freed and must not be used again after this call.
+        /// </summary>
+        public void Dispose() {
+            Dispose(true);
+        }
+
+        public IntPtr Handle() {
+            return _handle;
+        }
+
+        /// <summary>
         ///     Open the environment.
         /// </summary>
         public void Open(EnvironmentOpenFlags openFlags = EnvironmentOpenFlags.None, UnixAccessMode accessMode = UnixAccessMode.Default) {
-            if (IsOpened)
+            if (IsOpened) {
                 throw new InvalidOperationException("Environment is already opened.");
+            }
 
-            if (!openFlags.HasFlag(EnvironmentOpenFlags.NoSubDir) && !Directory.Exists(Path))
+            if (!openFlags.HasFlag(EnvironmentOpenFlags.NoSubDir) && !Directory.Exists(Path)) {
                 Directory.CreateDirectory(Path);
+            }
 
             try {
                 mdb_env_open(_handle, Path, openFlags, accessMode).ThrowOnError();
@@ -189,8 +208,9 @@ namespace LightningDB {
         ///     New LightningTransaction
         /// </returns>
         public LightningTransaction BeginTransaction(TransactionBeginFlags beginFlags = LightningTransaction.DefaultTransactionBeginFlags) {
-            if (!IsOpened)
+            if (!IsOpened) {
                 throw new InvalidOperationException("Environment must be opened before starting a transaction");
+            }
 
             return new(this, beginFlags);
         }
@@ -228,21 +248,24 @@ namespace LightningDB {
             return mdb_env_sync(_handle, force);
         }
 
-        void EnsureOpened() {
-            if (!IsOpened)
+        private void EnsureOpened() {
+            if (!IsOpened) {
                 throw new InvalidOperationException("Environment should be opened");
+            }
         }
 
         /// <summary>
         ///     Disposes the environment and deallocates all resources associated with it.
         /// </summary>
         /// <param name="disposing">True if called from Dispose.</param>
-        void Dispose(bool disposing) {
-            if (_handle == IntPtr.Zero)
+        private void Dispose(bool disposing) {
+            if (_handle == IntPtr.Zero) {
                 return;
+            }
 
-            if (!disposing)
+            if (!disposing) {
                 throw new InvalidOperationException("The LightningEnvironment was not disposed and cannot be reliably dealt with from the finalizer");
+            }
 
             if (IsOpened) {
                 mdb_env_close(_handle);
@@ -252,22 +275,12 @@ namespace LightningDB {
             _handle = IntPtr.Zero;
         }
 
-        /// <summary>
-        ///     Dispose the environment and release the memory map.
-        ///     Only a single thread may call this function. All transactions, databases, and cursors must already be closed before
-        ///     calling this function.
-        ///     Attempts to use any such handles after calling this function will cause a SIGSEGV.
-        ///     The environment handle will be freed and must not be used again after this call.
-        /// </summary>
-        public void Dispose() {
-            Dispose(true);
-        }
-
 #if DEBUG
         ~LightningEnvironment() {
-            if (_handle == default)
+            if (_handle == default) {
                 return;
-            throw new Exception("Leaked LightningEnvironment instance.");
+            }
+            throw new("Leaked LightningEnvironment instance.");
         }
 #endif
     }

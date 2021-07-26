@@ -6,6 +6,14 @@
     <AssemblyName>LightningDB</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <PlatformTarget>x64</PlatformTarget>
+    <NoWarn />
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   
   <ItemGroup>

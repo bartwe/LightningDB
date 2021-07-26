@@ -8,7 +8,7 @@ namespace LightningDB {
     public sealed class DatabaseConfiguration {
         public static DatabaseConfiguration Default = new();
 
-        IComparer<MDBValue> _comparer;
+        private IComparer<MDBValue>? _comparer;
 
         public DatabaseConfiguration() {
             Flags = DatabaseOpenFlags.None;
@@ -27,20 +27,21 @@ namespace LightningDB {
             return pinnedComparer;
         }
 
-        int Compare(ref MDBValue left, ref MDBValue right) {
-            return _comparer.Compare(left, right);
+        private int Compare(ref MDBValue left, ref MDBValue right) {
+            return _comparer!.Compare(left, right);
         }
 
         public void CompareWith(IComparer<MDBValue> comparer) {
             _comparer = comparer;
         }
 
-        sealed class ComparerKeepAlive : IDisposable {
-            readonly List<GCHandle> _comparisons = new();
+        private sealed class ComparerKeepAlive : IDisposable {
+            private readonly List<GCHandle> _comparisons = new();
 
             public void Dispose() {
-                for (var i = 0; i < _comparisons.Count; ++i)
+                for (var i = 0; i < _comparisons.Count; ++i) {
                     _comparisons[i].Free();
+                }
             }
 
             public void AddComparer(CompareFunction compare) {

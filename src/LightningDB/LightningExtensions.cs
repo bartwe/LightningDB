@@ -15,8 +15,9 @@ namespace LightningDB {
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static MDBResultCode ThrowOnReadError(this MDBResultCode resultCode) {
-            if (resultCode == MDBResultCode.NotFound)
+            if (resultCode == MDBResultCode.NotFound) {
                 return resultCode;
+            }
             return resultCode.ThrowOnError();
         }
 
@@ -29,9 +30,10 @@ namespace LightningDB {
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static MDBResultCode ThrowOnError(this MDBResultCode resultCode) {
-            if (resultCode == MDBResultCode.Success)
+            if (resultCode == MDBResultCode.Success) {
                 return resultCode;
-            var statusCode = (int) resultCode;
+            }
+            var statusCode = (int)resultCode;
             var message = mdb_strerror(statusCode);
             throw new LightningException(message, statusCode);
         }
@@ -48,9 +50,9 @@ namespace LightningDB {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static string mdb_strerror(int err) {
+        private static string mdb_strerror(int err) {
             var ptr = Lmdb.mdb_strerror(err);
-            return Marshal.PtrToStringAnsi(ptr);
+            return Marshal.PtrToStringAnsi(ptr) ?? "";
         }
 
         /// <summary>
@@ -64,8 +66,9 @@ namespace LightningDB {
         public static IEnumerable<ValueTuple<MDBValue, MDBValue>> AsEnumerable(this LightningCursor cursor) {
             do {
                 var (resultCode, key, value) = cursor.GetCurrent();
-                if (resultCode == MDBResultCode.Success)
+                if (resultCode == MDBResultCode.Success) {
                     yield return (key, value);
+                }
             } while (cursor.Next() == MDBResultCode.Success);
         }
 

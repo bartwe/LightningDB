@@ -24,7 +24,7 @@ namespace LightningDB {
         ///     If it is managed, it **MUST** be pinned via either GCHandle.Alloc or a fixed statement
         /// </param>
         internal MDBValue(int bufferSize, byte* pinnedOrStackAllocBuffer) {
-            size = (IntPtr) bufferSize;
+            size = (IntPtr)bufferSize;
             data = pinnedOrStackAllocBuffer;
         }
 
@@ -38,7 +38,7 @@ namespace LightningDB {
         ///     Gets a span representation of the buffer
         /// </summary>
         public ReadOnlySpan<byte> AsSpan() {
-            return new(data, (int) size);
+            return new(data, (int)size);
         }
     }
 }

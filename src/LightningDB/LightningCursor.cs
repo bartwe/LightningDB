@@ -6,7 +6,7 @@ namespace LightningDB {
     ///     Cursor to iterate over a database
     /// </summary>
     public struct LightningCursor : IDisposable {
-        IntPtr _handle;
+        private IntPtr _handle;
 
         /// <summary>
         ///     Creates new instance of LightningCursor
@@ -14,8 +14,9 @@ namespace LightningDB {
         /// <param name="db">Database</param>
         /// <param name="txn">Transaction</param>
         internal LightningCursor(LightningDatabase db, LightningTransaction txn) {
-            if (db == null)
+            if (db == null) {
                 throw new ArgumentNullException(nameof(db));
+            }
 
             mdb_cursor_open(txn.Handle(), db.Handle(), out _handle).ThrowOnError();
 
@@ -101,13 +102,13 @@ namespace LightningDB {
             return Get(CursorOperation.Previous).resultCode;
         }
 
-        (MDBResultCode resultCode, MDBValue key, MDBValue value) Get(CursorOperation operation) {
+        private (MDBResultCode resultCode, MDBValue key, MDBValue value) Get(CursorOperation operation) {
             var mdbKey = new MDBValue();
             var mdbValue = new MDBValue();
             return (mdb_cursor_get(_handle, ref mdbKey, ref mdbValue, operation), mdbKey, mdbValue);
         }
 
-        unsafe (MDBResultCode resultCode, MDBValue key, MDBValue value) Get(CursorOperation operation, ReadOnlySpan<byte> key) {
+        private unsafe (MDBResultCode resultCode, MDBValue key, MDBValue value) Get(CursorOperation operation, ReadOnlySpan<byte> key) {
             fixed (byte* keyPtr = key) {
                 var mdbKey = new MDBValue(key.Length, keyPtr);
                 var mdbValue = new MDBValue();
@@ -115,7 +116,7 @@ namespace LightningDB {
             }
         }
 
-        unsafe (MDBResultCode resultCode, MDBValue key, MDBValue value) Get(CursorOperation operation, ReadOnlySpan<byte> key, ReadOnlySpan<byte> value) {
+        private unsafe (MDBResultCode resultCode, MDBValue key, MDBValue value) Get(CursorOperation operation, ReadOnlySpan<byte> key, ReadOnlySpan<byte> value) {
             fixed (byte* keyPtr = key)
             fixed (byte* valPtr = value) {
                 var mdbKey = new MDBValue(key.Length, keyPtr);
@@ -174,7 +175,7 @@ namespace LightningDB {
         ///     MDB_NODUPDATA - delete all of the data items for the current key. This flag may only be specified if the database
         ///     was opened with MDB_DUPSORT.
         /// </param>
-        MDBResultCode Delete(CursorDeleteOption option) {
+        private MDBResultCode Delete(CursorDeleteOption option) {
             return mdb_cursor_del(_handle, option);
         }
 
@@ -208,8 +209,9 @@ namespace LightningDB {
         /// <param name="txn">Transaction to renew in.</param>
         /// <returns>Returns <see cref="MDBResultCode" /></returns>
         public MDBResultCode Renew(LightningTransaction txn) {
-            if (!txn.IsReadOnly)
+            if (!txn.IsReadOnly) {
                 throw new InvalidOperationException("Can't renew cursor on non-readonly transaction");
+            }
 
             return mdb_cursor_renew(txn.Handle(), _handle);
         }
@@ -218,12 +220,14 @@ namespace LightningDB {
         ///     Closes the cursor and deallocates all resources associated with it.
         /// </summary>
         /// <param name="disposing">True if called from Dispose.</param>
-        void Dispose(bool disposing) {
-            if (_handle == IntPtr.Zero)
+        private void Dispose(bool disposing) {
+            if (_handle == IntPtr.Zero) {
                 return;
+            }
 
-            if (!disposing)
+            if (!disposing) {
                 throw new InvalidOperationException("The LightningCursor was not disposed and cannot be reliably dealt with from the finalizer");
+            }
 
             mdb_cursor_close(_handle);
             _handle = IntPtr.Zero;
