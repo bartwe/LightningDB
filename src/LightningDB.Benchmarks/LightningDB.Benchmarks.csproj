@@ -16,11 +16,8 @@
 <ItemGroup Condition=" '$(OS)' == 'Unix' ">
   <None Include="../LightningDB/runtimes/osx/native/lmdb.dylib" CopyToOutputDirectory="PreserveNewest" />
 </ItemGroup>
-<ItemGroup Condition=" '$(Platform)' == 'x86' AND '$(OS)' != 'Unix' ">
-  <None Include="../LightningDB/runtimes/win-x86/native/lmdb.dll" CopyToOutputDirectory="PreserveNewest" />
-</ItemGroup>
-<ItemGroup Condition=" ('$(Platform)' == 'x64' OR '$(Platform)' == 'AnyCPU') AND '$(OS)' == 'Windows_NT' ">
-  <None Include="../LightningDB/runtimes/win-x64/native/lmdb.dll" CopyToOutputDirectory="PreserveNewest" />
+<ItemGroup Condition=" '$(OS)' == 'Windows_NT' ">
+  <None Include="../LightningDB/runtimes/win-AnyCPU/native/lmdb.dll" CopyToOutputDirectory="PreserveNewest" />
 </ItemGroup>
 
 
