@@ -6,17 +6,20 @@
     <AssemblyName>LightningDB</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <Nullable>enable</Nullable>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <Configurations>DebugLin64;DebugWin64</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+  <PropertyGroup Condition="'$(Configuration)'=='DebugWin64'">
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <NoWarn />
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  <PropertyGroup Condition="'$(Configuration)'=='DebugLin64'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <NoWarn />
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
   
   <ItemGroup>
