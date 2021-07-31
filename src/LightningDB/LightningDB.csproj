@@ -1,27 +1,36 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Description>LightningDB</Description>
-    <Authors>Ilya Lukyanov;Corey Kaylor</Authors>
+    <OutputType>Library</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyName>LightningDB</AssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+    <Configurations>DebugLin64;DebugWin64</Configurations>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <Nullable>enable</Nullable>
+    <OutputPath>bin\$(Configuration)</OutputPath>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <Configurations>DebugLin64;DebugWin64</Configurations>
+    <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)'=='DebugWin64'">
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <NoWarn />
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugWin64|AnyCPU'">
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)'=='DebugLin64'">
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <NoWarn />
-    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <Optimize>true</Optimize>
   </PropertyGroup>
-  
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLin64|AnyCPU'">
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Include="../../LICENSE" Pack="true" PackagePath="" />
   </ItemGroup>
@@ -37,4 +46,5 @@
   <ItemGroup>
     <PackageReference Include="System.Memory" Version="4.5.4" />
   </ItemGroup>
+
 </Project>
