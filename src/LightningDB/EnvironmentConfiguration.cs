@@ -3,32 +3,32 @@
     ///     Basic environment configuration
     /// </summary>
     public sealed class EnvironmentConfiguration {
-        private long? _mapSize;
-        private int? _maxReaders;
-        private int? _maxDatabases;
+        long? _mapSize;
+        int? _maxReaders;
+        int? _maxDatabases;
 
-        private bool? _autoResizeWindows;
+        bool? _autoResizeWindows;
 
         public long MapSize {
-            get => _mapSize ?? 0;
-            set => _mapSize = value;
+            get { return _mapSize ?? 0; }
+            set { _mapSize = value; }
         }
 
         public int MaxReaders {
-            get => _maxReaders ?? 0;
-            set => _maxReaders = value;
+            get { return _maxReaders ?? 0; }
+            set { _maxReaders = value; }
         }
 
         public int MaxDatabases {
-            get => _maxDatabases ?? 0;
-            set => _maxDatabases = value;
+            get { return _maxDatabases ?? 0; }
+            set { _maxDatabases = value; }
         }
 
         public bool AutoReduceMapSizeIn32BitProcess { get; set; }
 
         public bool AutoResizeWindows {
-            get => _autoResizeWindows ?? false;
-            set => _autoResizeWindows = value;
+            get { return _autoResizeWindows ?? false; }
+            set { _autoResizeWindows = value; }
         }
 
         internal void Configure(LightningEnvironment env) {

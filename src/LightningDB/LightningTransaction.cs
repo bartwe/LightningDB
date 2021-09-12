@@ -11,7 +11,7 @@ namespace LightningDB {
         /// </summary>
         public const TransactionBeginFlags DefaultTransactionBeginFlags = TransactionBeginFlags.None;
 
-        private IntPtr _handle;
+        IntPtr _handle;
 
         /// <summary>
         ///     Created new instance of LightningTransaction
@@ -230,12 +230,12 @@ namespace LightningDB {
         ///     Abort this transaction and deallocate all resources associated with it (including databases).
         /// </summary>
         /// <param name="disposing">True if called from Dispose.</param>
-        private void Dispose(bool disposing) {
+        void Dispose(bool disposing) {
             if (_handle == IntPtr.Zero) {
                 return;
             }
 
-            if (State == LightningTransactionState.Active || State == LightningTransactionState.Reseted) {
+            if ((State == LightningTransactionState.Active) || (State == LightningTransactionState.Reseted)) {
                 Abort();
             }
 

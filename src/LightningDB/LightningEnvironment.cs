@@ -7,9 +7,9 @@ namespace LightningDB {
     ///     LMDB Environment.
     /// </summary>
     public sealed class LightningEnvironment : IDisposable {
-        private readonly EnvironmentConfiguration _config = new();
+        readonly EnvironmentConfiguration _config = new();
 
-        private IntPtr _handle;
+        IntPtr _handle;
 
         /// <summary>
         ///     Creates a new instance of LightningEnvironment.
@@ -41,7 +41,9 @@ namespace LightningDB {
         /// <summary>
         ///     Current lmdb version.
         /// </summary>
-        public LightningVersionInfo Version => LightningVersionInfo.Get();
+        public LightningVersionInfo Version {
+            get { return LightningVersionInfo.Get(); }
+        }
 
 
         /// <summary>
@@ -58,13 +60,13 @@ namespace LightningDB {
         ///     the current size of the used space.
         /// </remarks>
         public long MapSize {
-            get => _config.MapSize;
+            get { return _config.MapSize; }
             set {
                 if (value == _config.MapSize) {
                     return;
                 }
 
-                if (_config.AutoReduceMapSizeIn32BitProcess && IntPtr.Size == 4) {
+                if (_config.AutoReduceMapSizeIn32BitProcess && (IntPtr.Size == 4)) {
                     _config.MapSize = int.MaxValue;
                 }
                 else {
@@ -101,7 +103,7 @@ namespace LightningDB {
         ///     This function may only be called before the environment is opened.
         /// </summary>
         public int MaxDatabases {
-            get => _config.MaxDatabases;
+            get { return _config.MaxDatabases; }
             set {
                 if (IsOpened) {
                     throw new InvalidOperationException("Can't change MaxDatabases of opened environment");
@@ -248,7 +250,7 @@ namespace LightningDB {
             return mdb_env_sync(_handle, force);
         }
 
-        private void EnsureOpened() {
+        void EnsureOpened() {
             if (!IsOpened) {
                 throw new InvalidOperationException("Environment should be opened");
             }
@@ -258,7 +260,7 @@ namespace LightningDB {
         ///     Disposes the environment and deallocates all resources associated with it.
         /// </summary>
         /// <param name="disposing">True if called from Dispose.</param>
-        private void Dispose(bool disposing) {
+        void Dispose(bool disposing) {
             if (_handle == IntPtr.Zero) {
                 return;
             }

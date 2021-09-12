@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace LightningDB.Native {
     public static class Lmdb {
-        private const string MDB_DLL_NAME = "lmdb";
+        const string MDB_DLL_NAME = "lmdb";
 
         public static MDBResultCode mdb_env_set_mapsize(IntPtr env, long size) {
             return mdb_env_set_mapsize(env, new IntPtr(size));
@@ -145,7 +145,7 @@ namespace LightningDB.Native {
             NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), DllImportResolver);
         }
 
-        private static IntPtr DllImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath) {
+        static IntPtr DllImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath) {
             if (libraryName == MDB_DLL_NAME) {
                 return NativeLibrary.Load($"{MDB_DLL_NAME}autoresize", assembly, searchPath);
             }

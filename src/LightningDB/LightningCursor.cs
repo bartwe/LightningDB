@@ -6,7 +6,7 @@ namespace LightningDB {
     ///     Cursor to iterate over a database
     /// </summary>
     public struct LightningCursor : IDisposable {
-        private IntPtr _handle;
+        IntPtr _handle;
 
         /// <summary>
         ///     Creates new instance of LightningCursor
@@ -102,13 +102,13 @@ namespace LightningDB {
             return Get(CursorOperation.Previous).resultCode;
         }
 
-        private (MDBResultCode resultCode, MDBValue key, MDBValue value) Get(CursorOperation operation) {
+        (MDBResultCode resultCode, MDBValue key, MDBValue value) Get(CursorOperation operation) {
             var mdbKey = new MDBValue();
             var mdbValue = new MDBValue();
             return (mdb_cursor_get(_handle, ref mdbKey, ref mdbValue, operation), mdbKey, mdbValue);
         }
 
-        private unsafe (MDBResultCode resultCode, MDBValue key, MDBValue value) Get(CursorOperation operation, ReadOnlySpan<byte> key) {
+        unsafe (MDBResultCode resultCode, MDBValue key, MDBValue value) Get(CursorOperation operation, ReadOnlySpan<byte> key) {
             fixed (byte* keyPtr = key) {
                 var mdbKey = new MDBValue(key.Length, keyPtr);
                 var mdbValue = new MDBValue();
@@ -116,7 +116,7 @@ namespace LightningDB {
             }
         }
 
-        private unsafe (MDBResultCode resultCode, MDBValue key, MDBValue value) Get(CursorOperation operation, ReadOnlySpan<byte> key, ReadOnlySpan<byte> value) {
+        unsafe (MDBResultCode resultCode, MDBValue key, MDBValue value) Get(CursorOperation operation, ReadOnlySpan<byte> key, ReadOnlySpan<byte> value) {
             fixed (byte* keyPtr = key)
             fixed (byte* valPtr = value) {
                 var mdbKey = new MDBValue(key.Length, keyPtr);
@@ -175,7 +175,7 @@ namespace LightningDB {
         ///     MDB_NODUPDATA - delete all of the data items for the current key. This flag may only be specified if the database
         ///     was opened with MDB_DUPSORT.
         /// </param>
-        private MDBResultCode Delete(CursorDeleteOption option) {
+        MDBResultCode Delete(CursorDeleteOption option) {
             return mdb_cursor_del(_handle, option);
         }
 
@@ -220,7 +220,7 @@ namespace LightningDB {
         ///     Closes the cursor and deallocates all resources associated with it.
         /// </summary>
         /// <param name="disposing">True if called from Dispose.</param>
-        private void Dispose(bool disposing) {
+        void Dispose(bool disposing) {
             if (_handle == IntPtr.Zero) {
                 return;
             }

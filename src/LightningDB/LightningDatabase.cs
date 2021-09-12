@@ -6,11 +6,11 @@ namespace LightningDB {
     ///     Lightning database.
     /// </summary>
     public sealed class LightningDatabase : IDisposable {
-        private uint _handle;
-        private readonly DatabaseConfiguration _configuration;
-        private readonly bool _closeOnDispose;
-        private readonly LightningTransaction _transaction;
-        private readonly IDisposable _pinnedConfig;
+        uint _handle;
+        readonly DatabaseConfiguration _configuration;
+        readonly bool _closeOnDispose;
+        readonly LightningTransaction _transaction;
+        readonly IDisposable _pinnedConfig;
 
         /// <summary>
         ///     Creates a LightningDatabase instance.
@@ -33,7 +33,9 @@ namespace LightningDB {
         /// <summary>
         ///     Whether the database handle has been release from Dispose, or from unsuccessful OpenDatabase call.
         /// </summary>
-        public bool IsReleased => _handle == default;
+        public bool IsReleased {
+            get { return _handle == default; }
+        }
 
         /// <summary>
         ///     Is database opened.
@@ -96,7 +98,7 @@ namespace LightningDB {
         ///     Deallocates resources opened by the database.
         /// </summary>
         /// <param name="disposing">true if called from Dispose.</param>
-        private void Dispose(bool disposing) {
+        void Dispose(bool disposing) {
             if (_handle == default) {
                 return;
             }

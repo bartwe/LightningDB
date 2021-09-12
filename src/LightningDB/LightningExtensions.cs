@@ -50,7 +50,7 @@ namespace LightningDB {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static string mdb_strerror(int err) {
+        static string mdb_strerror(int err) {
             var ptr = Lmdb.mdb_strerror(err);
             return Marshal.PtrToStringAnsi(ptr) ?? "";
         }
