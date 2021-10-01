@@ -234,7 +234,6 @@ namespace LightningDB {
             mdb_env_copy2(_handle, path, flags);
         }
 
-        //TODO: tests
         /// <summary>
         ///     Flush the data buffers to disk.
         ///     Data is always written to disk when LightningTransaction.Commit is called, but the operating system may keep it
