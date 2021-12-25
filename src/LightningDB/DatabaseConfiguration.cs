@@ -7,7 +7,9 @@ using static LightningDB.Native.Lmdb;
 namespace LightningDB;
 
 public sealed class DatabaseConfiguration {
+#pragma warning disable CA2211 // Non-constant fields should not be visible
     public static DatabaseConfiguration Default = new();
+#pragma warning restore CA2211 // Non-constant fields should not be visible
 
     IComparer<MDBValue>? _comparer;
 
