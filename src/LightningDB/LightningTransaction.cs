@@ -231,22 +231,15 @@ public struct LightningTransaction : IDisposable {
     ///     Abort this transaction and deallocate all resources associated with it (including databases).
     /// </summary>
     /// <param name="disposing">True if called from Dispose.</param>
-    void Dispose(bool disposing) {
+    public void Dispose() {
         if (_handle == IntPtr.Zero) {
             return;
         }
 
-        if ((State == LightningTransactionState.Active) || (State == LightningTransactionState.Reseted)) {
+        if (State is LightningTransactionState.Active or LightningTransactionState.Reseted) {
             Abort();
         }
 
         _handle = IntPtr.Zero;
-    }
-
-    /// <summary>
-    ///     Dispose this transaction and deallocate all resources associated with it (including databases).
-    /// </summary>
-    public void Dispose() {
-        Dispose(true);
     }
 }

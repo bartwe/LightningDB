@@ -71,6 +71,7 @@ public sealed class LightningDatabase : IDisposable {
     ///     Deallocates resources opened by the database.
     /// </summary>
     public void Dispose() {
+        GC.SuppressFinalize(this);
         Dispose(true);
     }
 

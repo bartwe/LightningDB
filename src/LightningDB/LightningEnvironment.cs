@@ -42,7 +42,7 @@ public sealed class LightningEnvironment : IDisposable {
     /// <summary>
     ///     Current lmdb version.
     /// </summary>
-    public LightningVersionInfo Version {
+    public static LightningVersionInfo Version {
         get { return LightningVersionInfo.Get(); }
     }
 
@@ -160,6 +160,7 @@ public sealed class LightningEnvironment : IDisposable {
     ///     The environment handle will be freed and must not be used again after this call.
     /// </summary>
     public void Dispose() {
+        GC.SuppressFinalize(this);
         Dispose(true);
     }
 
