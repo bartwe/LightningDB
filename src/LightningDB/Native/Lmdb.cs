@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace LightningDB.Native;
 
-internal static class Lmdb {
+public static class Lmdb {
     const string MDB_DLL_NAME = "lmdb";
 
     public static MDBResultCode mdb_env_set_mapsize(IntPtr env, long size) {
@@ -43,8 +43,8 @@ internal static class Lmdb {
     [DllImport(MDB_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
     public static extern void mdb_env_close(IntPtr env);
 
-    [DllImport(MDB_DLL_NAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-    internal static extern MDBResultCode mdb_env_open(IntPtr env, string path, EnvironmentOpenFlags flags, UnixAccessMode mode);
+    [DllImport(MDB_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern MDBResultCode mdb_env_open(IntPtr env, IntPtr path, EnvironmentOpenFlags flags, UnixAccessMode mode);
 
     [DllImport(MDB_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
     public static extern MDBResultCode mdb_env_set_mapsize(IntPtr env, IntPtr size);
@@ -58,8 +58,8 @@ internal static class Lmdb {
     [DllImport(MDB_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
     public static extern MDBResultCode mdb_env_set_maxdbs(IntPtr env, uint dbs);
 
-    [DllImport(MDB_DLL_NAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-    public static extern MDBResultCode mdb_dbi_open(IntPtr txn, string name, DatabaseOpenFlags flags, out uint db);
+    [DllImport(MDB_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+    public static extern MDBResultCode mdb_dbi_open(IntPtr txn, IntPtr name, DatabaseOpenFlags flags, out uint db);
 
     [DllImport(MDB_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
     public static extern void mdb_dbi_close(IntPtr env, uint dbi);
@@ -91,11 +91,11 @@ internal static class Lmdb {
     [DllImport(MDB_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
     public static extern MDBResultCode mdb_stat(IntPtr txn, uint dbi, out MDBStat stat);
 
-    [DllImport(MDB_DLL_NAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-    public static extern MDBResultCode mdb_env_copy(IntPtr env, string path);
+    [DllImport(MDB_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+    public static extern MDBResultCode mdb_env_copy(IntPtr env, IntPtr path);
 
-    [DllImport(MDB_DLL_NAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-    public static extern MDBResultCode mdb_env_copy2(IntPtr env, string path, EnvironmentCopyFlags copyFlags);
+    [DllImport(MDB_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+    public static extern MDBResultCode mdb_env_copy2(IntPtr env, IntPtr path, EnvironmentCopyFlags copyFlags);
 
     [DllImport(MDB_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
     public static extern MDBResultCode mdb_env_info(IntPtr env, out MDBEnvInfo stat);

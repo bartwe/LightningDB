@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using static LightningDB.Native.Lmdb;
 
 namespace LightningDB;
@@ -181,7 +182,14 @@ public sealed class LightningEnvironment : IDisposable {
         }
 
         try {
-            mdb_env_open(_handle, Path, openFlags, accessMode).ThrowOnError();
+            var pathUtf8 = Marshal.StringToCoTaskMemUTF8(Path);
+            try {
+                mdb_env_open(_handle, pathUtf8, openFlags, accessMode).ThrowOnError();
+            }
+            finally {
+                Marshal.FreeCoTaskMem(pathUtf8);
+            }
+
         }
         catch (Exception ex) {
             throw new LightningException($"Failed to open environment at path {Path}", ex);
@@ -233,7 +241,13 @@ public sealed class LightningEnvironment : IDisposable {
 
         var flags = compact ? EnvironmentCopyFlags.Compact : EnvironmentCopyFlags.None;
 
-        mdb_env_copy2(_handle, path, flags).ThrowOnError();
+        var pathUtf8 = Marshal.StringToCoTaskMemUTF8(path);
+        try {
+            mdb_env_copy2(_handle, pathUtf8, flags).ThrowOnError();
+        }
+        finally {
+            Marshal.FreeCoTaskMem(pathUtf8);
+        }
     }
 
     /// <summary>

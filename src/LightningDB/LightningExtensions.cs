@@ -53,7 +53,7 @@ public static class LightningExtensions {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static string mdb_strerror(int err) {
         var ptr = Lmdb.mdb_strerror(err);
-        return Marshal.PtrToStringAnsi(ptr) ?? "";
+        return Marshal.PtrToStringUTF8(ptr) ?? "";
     }
 
     /// <summary>

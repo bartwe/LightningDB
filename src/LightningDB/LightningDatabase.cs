@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Runtime.InteropServices;
 using static LightningDB.Native.Lmdb;
 
 namespace LightningDB;
@@ -26,7 +28,13 @@ public sealed class LightningDatabase : IDisposable {
         _closeOnDispose = closeOnDispose;
         Environment = transaction.Environment;
         _transaction = transaction;
-        mdb_dbi_open(transaction.Handle(), name, _configuration.Flags, out _handle).ThrowOnError();
+        var nameUtf8 = Marshal.StringToCoTaskMemUTF8(name);
+        try {
+            mdb_dbi_open(transaction.Handle(), nameUtf8, _configuration.Flags, out _handle).ThrowOnError();
+        }
+        finally {
+            Marshal.FreeCoTaskMem(nameUtf8);
+        }
         _pinnedConfig = _configuration.ConfigureDatabase(transaction, this);
         IsOpened = true;
     }
