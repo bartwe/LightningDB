@@ -42,9 +42,7 @@ public sealed class LightningDatabase : IDisposable {
     /// <summary>
     ///     Whether the database handle has been release from Dispose, or from unsuccessful OpenDatabase call.
     /// </summary>
-    public bool IsReleased {
-        get { return _handle == default; }
-    }
+    public bool IsReleased => _handle == default;
 
     /// <summary>
     ///     Is database opened.

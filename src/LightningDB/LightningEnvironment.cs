@@ -43,9 +43,7 @@ public sealed class LightningEnvironment : IDisposable {
     /// <summary>
     ///     Current lmdb version.
     /// </summary>
-    public static LightningVersionInfo Version {
-        get { return LightningVersionInfo.Get(); }
-    }
+    public static LightningVersionInfo Version => LightningVersionInfo.Get();
 
 
     /// <summary>
@@ -62,7 +60,7 @@ public sealed class LightningEnvironment : IDisposable {
     ///     the current size of the used space.
     /// </remarks>
     public long MapSize {
-        get { return _config.MapSize; }
+        get => _config.MapSize;
         set {
             if (value == _config.MapSize) {
                 return;
@@ -105,7 +103,7 @@ public sealed class LightningEnvironment : IDisposable {
     ///     This function may only be called before the environment is opened.
     /// </summary>
     public int MaxDatabases {
-        get { return _config.MaxDatabases; }
+        get => _config.MaxDatabases;
         set {
             if (IsOpened) {
                 throw new InvalidOperationException("Can't change MaxDatabases of opened environment");

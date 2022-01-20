@@ -11,25 +11,25 @@ public sealed class EnvironmentConfiguration {
     bool? _autoResizeWindows;
 
     public long MapSize {
-        get { return _mapSize ?? 0; }
-        set { _mapSize = value; }
+        get => _mapSize ?? 0;
+        set => _mapSize = value;
     }
 
     public int MaxReaders {
-        get { return _maxReaders ?? 0; }
-        set { _maxReaders = value; }
+        get => _maxReaders ?? 0;
+        set => _maxReaders = value;
     }
 
     public int MaxDatabases {
-        get { return _maxDatabases ?? 0; }
-        set { _maxDatabases = value; }
+        get => _maxDatabases ?? 0;
+        set => _maxDatabases = value;
     }
 
     public bool AutoReduceMapSizeIn32BitProcess { get; set; }
 
     public bool AutoResizeWindows {
-        get { return _autoResizeWindows ?? false; }
-        set { _autoResizeWindows = value; }
+        get => _autoResizeWindows ?? false;
+        set => _autoResizeWindows = value;
     }
 
     internal void Configure(LightningEnvironment env) {
