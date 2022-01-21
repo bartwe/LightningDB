@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace LightningDB.Native;
 
-public static class Lmdb {
+static class Lmdb {
     const string MDB_DLL_NAME = "lmdb";
 
     public static MDBResultCode mdb_env_set_mapsize(IntPtr env, long size) {
