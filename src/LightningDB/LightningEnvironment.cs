@@ -187,7 +187,6 @@ public sealed class LightningEnvironment : IDisposable {
             finally {
                 Marshal.FreeCoTaskMem(pathUtf8);
             }
-
         }
         catch (Exception ex) {
             throw new LightningException($"Failed to open environment at path {Path}", ex);
