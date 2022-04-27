@@ -27,7 +27,7 @@ public struct LightningTransaction : IDisposable {
         mdb_txn_begin(environment.Handle(), IntPtr.Zero, flags, out _handle).ThrowOnError();
     }
 
-    public IntPtr Handle() {
+    public readonly IntPtr Handle() {
         return _handle;
     }
 

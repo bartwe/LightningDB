@@ -7,15 +7,15 @@ public struct EnvironmentInfo {
     /// <summary>
     ///     ID of the last used page
     /// </summary>
-    public long LastPageNumber { get; set; }
+    public long LastPageNumber;
 
     /// <summary>
     ///     ID of the last committed transaction
     /// </summary>
-    public long LastTransactionId { get; set; }
+    public long LastTransactionId;
 
     /// <summary>
     ///     Size of the data memory map
     /// </summary>
-    public long MapSize { get; set; }
+    public long MapSize;
 }
