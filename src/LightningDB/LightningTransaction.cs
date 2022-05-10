@@ -192,6 +192,9 @@ public struct LightningTransaction : IDisposable {
     ///     The cursors and transaction handle will be freed and must not be used again after this call.
     /// </summary>
     public MDBResultCode Commit() {
+        if (State != LightningTransactionState.Active) {
+            throw new InvalidOperationException("Transaction should be active");
+        }
         State = LightningTransactionState.Commited;
         return mdb_txn_commit(_handle);
     }
@@ -202,8 +205,12 @@ public struct LightningTransaction : IDisposable {
     ///     The cursors and transaction handle will be freed and must not be used again after this call.
     /// </summary>
     public void Abort() {
-        State = LightningTransactionState.Aborted;
-        mdb_txn_abort(_handle);
+        if (State is LightningTransactionState.Active or LightningTransactionState.Reseted) {
+            State = LightningTransactionState.Aborted;
+            mdb_txn_abort(_handle);
+        }
+        else
+            throw new InvalidOperationException("Transaction should be active");
     }
 
     /// <summary>

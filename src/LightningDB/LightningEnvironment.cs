@@ -280,13 +280,10 @@ public sealed class LightningEnvironment : IDisposable {
         if (!disposing) {
             throw new InvalidOperationException("The LightningEnvironment was not disposed and cannot be reliably dealt with from the finalizer");
         }
-
-        if (IsOpened) {
-            mdb_env_close(_handle);
-            IsOpened = false;
-        }
-
+        mdb_env_close(_handle);
         _handle = IntPtr.Zero;
+
+        IsOpened = false;
     }
 
 #if DEBUG
