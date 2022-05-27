@@ -129,7 +129,7 @@ public enum MDBResultCode {
     ///     ENXIO  error from C-runtime
     /// </summary>
     NoSuchDeviceOrAddress = 6,
-    
+
     /// <summary>
     ///     ENOMEM error from C-runtime
     /// </summary>
