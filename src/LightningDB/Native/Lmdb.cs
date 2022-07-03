@@ -11,7 +11,7 @@ static class Lmdb {
         return mdb_env_set_mapsize(env, new IntPtr(size));
     }
 
-    public static MDBResultCode mdb_put(IntPtr txn, uint dbi, MDBValue key, MDBValue value, PutOptions flags) {
+    public static MDBResultCode mdb_put(IntPtr txn, uint dbi, MDBValue key, ref MDBValue value, PutOptions flags) {
         return mdb_put(txn, dbi, ref key, ref value, flags);
     }
 

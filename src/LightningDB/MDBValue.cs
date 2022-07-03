@@ -38,7 +38,11 @@ public unsafe struct MDBValue {
     /// <summary>
     ///     Gets a span representation of the buffer
     /// </summary>
-    public ReadOnlySpan<byte> AsSpan() {
+    public ReadOnlySpan<byte> AsReadonlySpan() {
+        return new(data, (int)size);
+    }
+
+    public Span<byte> AsSpan() {
         return new(data, (int)size);
     }
 }

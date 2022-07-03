@@ -85,7 +85,7 @@ public static class LightningExtensions {
     public static bool TryGet(this LightningTransaction tx, LightningDatabase db, ReadOnlySpan<byte> key, out ReadOnlySpan<byte> value) {
         var (resultCode, mdbValue) = tx.Get(db, key);
         if (resultCode == MDBResultCode.Success) {
-            value = mdbValue.AsSpan();
+            value = mdbValue.AsReadonlySpan();
             return true;
         }
         value = default;

@@ -107,9 +107,36 @@ public struct LightningTransaction : IDisposable {
             var mdbKey = new MDBValue(key.Length, keyPtr);
             var mdbValue = new MDBValue(value.Length, valuePtr);
 
-            return mdb_put(_handle, db.Handle(), mdbKey, mdbValue, options);
+            return mdb_put(_handle, db.Handle(), mdbKey, ref mdbValue, options);
         }
     }
+
+    /// <summary>
+    ///     Reserve place for data in database.
+    ///		Similair to Put except it returns a Span you need to fill.
+    /// </summary>
+    /// <param name="db">Database.</param>
+    /// <param name="key">Key byte array.</param>
+    /// <param name="length">Size of the value.</param>
+    /// <param name="value">Value byte array.</param>
+    public unsafe MDBResultCode ReservePut(LightningDatabase db, ReadOnlySpan<byte> key, int length, out Span<byte> value) {
+        if (db == null) {
+            throw new ArgumentNullException(nameof(db));
+        }
+
+        fixed (byte* keyPtr = key) {
+            var mdbKey = new MDBValue(key.Length, keyPtr);
+            var mdbValue = new MDBValue(length, (byte*)0);
+
+            var result = mdb_put(_handle, db.Handle(), mdbKey, ref mdbValue, PutOptions.ReserveSpace);
+            if (result == MDBResultCode.Success)
+                value = mdbValue.AsSpan();
+            else
+                value = Span<byte>.Empty;
+            return result;
+        }
+    }
+
 
     /// <summary>
     ///     Delete items from a database.
