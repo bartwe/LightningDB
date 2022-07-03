@@ -142,8 +142,18 @@ static class Lmdb {
     [DllImport(MDB_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
     public static extern MDBResultCode mdb_set_dupsort(IntPtr txn, uint dbi, CompareFunction cmp);
 
+    static bool _ShouldSetDllImportResolver = true;
+    static readonly object _SyncRoot = new();
+
     public static void LoadWindowsAutoResizeLibrary() {
-        NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), DllImportResolver);
+        if (_ShouldSetDllImportResolver) {
+            lock (_SyncRoot) {
+                if (_ShouldSetDllImportResolver) {
+                    NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), DllImportResolver);
+                    _ShouldSetDllImportResolver = false;
+                }
+            }
+        }
     }
 
     static IntPtr DllImportResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath) {
