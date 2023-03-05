@@ -103,7 +103,7 @@ public struct LightningCursor : IDisposable {
         return Get(CursorOperation.Previous).resultCode;
     }
 
-    (MDBResultCode resultCode, MDBValue key, MDBValue value) Get(CursorOperation operation) {
+    public (MDBResultCode resultCode, MDBValue key, MDBValue value) Get(CursorOperation operation) {
         var mdbKey = new MDBValue();
         var mdbValue = new MDBValue();
         return (mdb_cursor_get(_handle, ref mdbKey, ref mdbValue, operation), mdbKey, mdbValue);
