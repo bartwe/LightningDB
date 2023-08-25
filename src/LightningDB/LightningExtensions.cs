@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using LightningDB.Native;
@@ -53,7 +54,10 @@ public static class LightningExtensions {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static string mdb_strerror(int err) {
         var ptr = Lmdb.mdb_strerror(err);
-        return Marshal.PtrToStringUTF8(ptr) ?? "";
+        var result = Marshal.PtrToStringUTF8(ptr);
+        if (result == null)
+            result = new Win32Exception(err).Message;
+        return result;
     }
 
     /// <summary>
