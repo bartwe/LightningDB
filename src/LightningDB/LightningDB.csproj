@@ -1,48 +1,60 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Library</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+    </PropertyGroup>
 
-  <PropertyGroup>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
-    <Configurations>DebugLinuxArm32;DebugLinuxX64;DebugWindowsX64</Configurations>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <Nullable>enable</Nullable>
-    <OutputPath>bin\$(Configuration)</OutputPath>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <Platforms>AnyCPU</Platforms>
-  </PropertyGroup>
+    <PropertyGroup>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+        <Configurations>DebugLinuxArm32;DebugLinuxX64;DebugWindowsX64;DebugWindowsAOTX64</Configurations>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+        <Nullable>enable</Nullable>
+        <OutputPath>bin\$(Configuration)</OutputPath>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <Platforms>AnyCPU</Platforms>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugWindowsX64|AnyCPU'">
-    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugWindowsX64|AnyCPU'">
+        <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+        <Optimize>true</Optimize>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLinuxArm32|AnyCPU'">
-    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLinuxArm32|AnyCPU'">
+        <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+        <Optimize>true</Optimize>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLinuxX64|AnyCPU'">
-    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLinuxX64|AnyCPU'">
+        <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+        <Optimize>true</Optimize>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <None Include="../../LICENSE" Pack="true" PackagePath="" />
-  </ItemGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugWindowsAOTX64|AnyCPU'">
+        <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+        <Optimize>true</Optimize>
+        <PublishAot>true</PublishAot>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    </PropertyGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="$(ProjectDir)PostBuild.$(ConfigurationName).cmd" />
-  </Target>
+    <ItemGroup Condition="'$(Configuration)|$(Platform)'=='DebugWindowsAOTX64|AnyCPU'">
+        <RuntimeHostConfigurationOption Include="System.Runtime.InteropServices.EnableCppInterop" Value="true" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="../../LICENSE" Pack="true" PackagePath="" />
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="$(ProjectDir)PostBuild.$(ConfigurationName).cmd" />
+    </Target>
 
 </Project>
