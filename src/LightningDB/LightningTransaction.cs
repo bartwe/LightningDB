@@ -158,9 +158,6 @@ public struct LightningTransaction : IDisposable {
         fixed (byte* keyPtr = key)
         fixed (byte* valuePtr = value) {
             var mdbKey = new MDBValue(key.Length, keyPtr);
-            if (value == null) {
-                return mdb_del(_handle, db.Handle(), mdbKey);
-            }
             var mdbValue = new MDBValue(value.Length, valuePtr);
             return mdb_del(_handle, db.Handle(), mdbKey, mdbValue);
         }
