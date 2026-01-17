@@ -61,7 +61,7 @@ public static class LightningExtensions {
     }
 
     /// <summary>
-    ///     Enumerates the key/value pairs of the <see cref="LightningCursor" /> starting at the current position.
+    ///     Enumerates the key/value pairs of the <see cref="LightningCursor" />
     /// </summary>
     /// <param name="cursor">
     ///     <see cref="LightningCursor" />
@@ -91,6 +91,8 @@ public static class LightningExtensions {
             value = mdbValue.AsReadonlySpan();
             return true;
         }
+        if (resultCode != MDBResultCode.NotFound)
+            resultCode.ThrowOnError();
         value = default;
         return false;
     }
@@ -105,6 +107,10 @@ public static class LightningExtensions {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool ContainsKey(this LightningTransaction tx, LightningDatabase db, ReadOnlySpan<byte> key) {
         var (resultCode, _) = tx.Get(db, key);
-        return resultCode == MDBResultCode.Success;
+        if (resultCode == MDBResultCode.Success)
+            return true;
+        if (resultCode != MDBResultCode.NotFound)
+            resultCode.ThrowOnError();
+        return false;
     }
 }
