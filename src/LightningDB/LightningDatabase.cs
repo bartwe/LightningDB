@@ -92,7 +92,7 @@ public sealed class LightningDatabase : IDisposable {
         IsOpened = false;
         _pinnedConfig.Dispose();
         // mdb_drop does a mdb_dbi_close internally
-        _handle = default; 
+        _handle = default;
         return result;
     }
 

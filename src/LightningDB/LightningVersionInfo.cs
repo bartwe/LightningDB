@@ -10,10 +10,7 @@ public struct LightningVersionInfo {
     internal static LightningVersionInfo Get() {
         var version = mdb_version(out var major, out var minor, out var patch);
         return new() {
-            Version = Marshal.PtrToStringUTF8(version) ?? "",
-            Major = major,
-            Minor = minor,
-            Patch = patch,
+            Version = Marshal.PtrToStringUTF8(version) ?? "", Major = major, Minor = minor, Patch = patch,
         };
     }
 
