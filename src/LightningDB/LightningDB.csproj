@@ -78,7 +78,7 @@
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-        <Exec Command="$(ProjectDir)PostBuild.$(ConfigurationName).cmd" />
+        <Exec Condition="'$(SkipHostSpecificPostBuild)' != 'true'" Command="$(ProjectDir)PostBuild.$(ConfigurationName).cmd" />
     </Target>
 
 </Project>
