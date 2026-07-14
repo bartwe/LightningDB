@@ -2,8 +2,9 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <OutputType>Exe</OutputType>
-        <LightningDBTargetRuntimeRelativePath>.\</LightningDBTargetRuntimeRelativePath>
-    </PropertyGroup>
+    <Configurations>DebugLinuxArm32;DebugLinuxArm64;DebugLinuxX64;DebugMacOSX64;DebugMacOSArm64;DebugWindowsX64;DebugWindowsArm64</Configurations>
+    <LightningDBTargetRuntimeRelativePath>.\</LightningDBTargetRuntimeRelativePath>
+  </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\LightningDB\LightningDB.csproj" />

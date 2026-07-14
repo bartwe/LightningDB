@@ -89,6 +89,20 @@ namespace LightningDB.Tests {
         }
 
         [Fact]
+        public void CursorReferencesShareNativeHandleOwnership() {
+            using var tx = _env.BeginTransaction();
+            using var db = tx.OpenDatabase(configuration: new() { Flags = DatabaseOpenFlags.Create });
+            var cursor = tx.CreateCursor(db);
+            var alias = cursor;
+
+            Assert.Same(cursor, alias);
+            cursor.Dispose();
+            alias.Dispose();
+
+            Assert.Equal(IntPtr.Zero, alias.Handle());
+        }
+
+        [Fact]
         public void CursorShouldSetSpanKey() {
             _env.RunCursorScenario(
                 (tx, db, c) => {
@@ -140,6 +154,20 @@ namespace LightningDB.Tests {
                     Assert.Equal(MDBResultCode.Success, result);
                 }, transactionFlags: TransactionBeginFlags.ReadOnly
             );
+        }
+
+        [Fact]
+        public void ShouldRenewWithDifferentTransaction() {
+            using var firstTransaction = _env.BeginTransaction(TransactionBeginFlags.ReadOnly);
+            using var db = firstTransaction.OpenDatabase();
+            using var cursor = firstTransaction.CreateCursor(db);
+            firstTransaction.Reset();
+
+            using var secondTransaction = _env.BeginTransaction(TransactionBeginFlags.ReadOnly);
+            var result = cursor.Renew(secondTransaction);
+
+            Assert.Equal(MDBResultCode.Success, result);
+            Assert.Same(secondTransaction, cursor.Transaction);
         }
 
         [Fact]

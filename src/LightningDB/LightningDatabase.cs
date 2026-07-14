@@ -36,6 +36,7 @@ public sealed class LightningDatabase : IDisposable {
         }
         _pinnedConfig = _configuration.ConfigureDatabase(transaction, this);
         IsOpened = true;
+        Environment.Disposing += Dispose;
     }
 
     /// <summary>
@@ -90,6 +91,7 @@ public sealed class LightningDatabase : IDisposable {
     public MDBResultCode Drop(LightningTransaction transaction) {
         var result = mdb_drop(transaction.Handle(), _handle, true);
         IsOpened = false;
+        Environment.Disposing -= Dispose;
         _pinnedConfig.Dispose();
         // mdb_drop does a mdb_dbi_close internally
         _handle = default;
@@ -116,6 +118,7 @@ public sealed class LightningDatabase : IDisposable {
             throw new InvalidOperationException("The LightningDatabase was not disposed and cannot be reliably dealt with from the finalizer");
         }
 
+        Environment.Disposing -= Dispose;
         IsOpened = false;
         _pinnedConfig.Dispose();
 

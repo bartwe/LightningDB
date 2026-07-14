@@ -4,6 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>LightningDB.Tests</AssemblyName>
     <PackageId>LightningDB.Tests</PackageId>
+    <Configurations>DebugLinuxArm32;DebugLinuxArm64;DebugLinuxX64;DebugMacOSX64;DebugMacOSArm64;DebugWindowsX64;DebugWindowsArm64</Configurations>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <IsTestProject>true</IsTestProject>
     <LightningDBTargetRuntimeRelativePath>.\</LightningDBTargetRuntimeRelativePath>
@@ -11,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LightningDB\LightningDB.csproj" />
+    <ProjectReference Include="..\SecondProcess\SecondProcess.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>

@@ -65,6 +65,19 @@ namespace LightningDB.Tests {
         }
 
         [Fact]
+        public void TransactionReferencesShareNativeHandleOwnership() {
+            var transaction = _env.BeginTransaction();
+            var alias = transaction;
+
+            Assert.Same(transaction, alias);
+            transaction.Dispose();
+            alias.Dispose();
+
+            Assert.Equal(IntPtr.Zero, alias.Handle());
+            Assert.Equal(LightningTransactionState.Aborted, alias.State);
+        }
+
+        [Fact]
         public void TransactionShouldBeAbortedIfEnvironmentCloses() {
             _env.RunTransactionScenario(
                 (tx, db) => {

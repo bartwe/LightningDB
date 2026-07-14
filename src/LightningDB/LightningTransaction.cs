@@ -6,13 +6,30 @@ namespace LightningDB;
 /// <summary>
 ///     Represents a transaction.
 /// </summary>
-public struct LightningTransaction : IDisposable {
+public sealed class LightningTransaction : IDisposable {
     /// <summary>
     ///     Default options used to begin new transactions.
     /// </summary>
     public const TransactionBeginFlags DefaultTransactionBeginFlags = TransactionBeginFlags.None;
 
     IntPtr _handle;
+
+    internal event Action? Disposing;
+
+    /// <summary>
+    ///     Current transaction state.
+    /// </summary>
+    public LightningTransactionState State { get; private set; }
+
+    /// <summary>
+    ///     Environment in which the transaction was opened.
+    /// </summary>
+    public LightningEnvironment Environment { get; }
+
+    /// <summary>
+    ///     Whether this transaction is read-only.
+    /// </summary>
+    public bool IsReadOnly { get; }
 
     /// <summary>
     ///     Created new instance of LightningTransaction
@@ -25,16 +42,12 @@ public struct LightningTransaction : IDisposable {
         IsReadOnly = flags == TransactionBeginFlags.ReadOnly;
         State = LightningTransactionState.Active;
         mdb_txn_begin(environment.Handle(), IntPtr.Zero, flags, out _handle).ThrowOnError();
+        Environment.Disposing += Dispose;
     }
 
-    public readonly IntPtr Handle() {
+    public IntPtr Handle() {
         return _handle;
     }
-
-    /// <summary>
-    ///     Current transaction state.
-    /// </summary>
-    public LightningTransactionState State { get; private set; }
 
 
     /// <summary>
@@ -219,6 +232,7 @@ public struct LightningTransaction : IDisposable {
         if (State != LightningTransactionState.Active) {
             throw new InvalidOperationException("Transaction should be active");
         }
+        Disposing?.Invoke();
         State = LightningTransactionState.Commited;
         return mdb_txn_commit(_handle);
     }
@@ -230,6 +244,7 @@ public struct LightningTransaction : IDisposable {
     /// </summary>
     public void Abort() {
         if (State is LightningTransactionState.Active or LightningTransactionState.Reseted) {
+            Disposing?.Invoke();
             State = LightningTransactionState.Aborted;
             mdb_txn_abort(_handle);
         }
@@ -249,16 +264,6 @@ public struct LightningTransaction : IDisposable {
     }
 
     /// <summary>
-    ///     Environment in which the transaction was opened.
-    /// </summary>
-    public LightningEnvironment Environment { get; }
-
-    /// <summary>
-    ///     Whether this transaction is read-only.
-    /// </summary>
-    public bool IsReadOnly { get; }
-
-    /// <summary>
     ///     Abort this transaction and deallocate all resources associated with it (including databases).
     /// </summary>
     /// <param name="disposing">True if called from Dispose.</param>
@@ -266,6 +271,8 @@ public struct LightningTransaction : IDisposable {
         if (_handle == IntPtr.Zero) {
             return;
         }
+
+        Environment.Disposing -= Dispose;
 
         if (State is LightningTransactionState.Active or LightningTransactionState.Reseted) {
             Abort();

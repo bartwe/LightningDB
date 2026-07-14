@@ -6,8 +6,13 @@ namespace LightningDB;
 /// <summary>
 ///     Cursor to iterate over a database
 /// </summary>
-public struct LightningCursor : IDisposable {
+public sealed class LightningCursor : IDisposable {
     IntPtr _handle;
+
+    /// <summary>
+    ///     Cursor's transaction.
+    /// </summary>
+    public LightningTransaction Transaction { get; private set; }
 
     /// <summary>
     ///     Creates new instance of LightningCursor
@@ -19,9 +24,14 @@ public struct LightningCursor : IDisposable {
             throw new ArgumentNullException(nameof(db));
         }
 
+        if (txn == null) {
+            throw new ArgumentNullException(nameof(txn));
+        }
+
         mdb_cursor_open(txn.Handle(), db.Handle(), out _handle).ThrowOnError();
 
         Transaction = txn;
+        Transaction.Disposing += Dispose;
     }
 
     /// <summary>
@@ -30,11 +40,6 @@ public struct LightningCursor : IDisposable {
     public IntPtr Handle() {
         return _handle;
     }
-
-    /// <summary>
-    ///     Cursor's transaction.
-    /// </summary>
-    public LightningTransaction Transaction { get; }
 
     /// <summary>
     ///     Position at specified key, if key is not found index will be positioned to closest match.
@@ -214,7 +219,13 @@ public struct LightningCursor : IDisposable {
             throw new InvalidOperationException("Can't renew cursor on non-readonly transaction");
         }
 
-        return mdb_cursor_renew(txn.Handle(), _handle);
+        var result = mdb_cursor_renew(txn.Handle(), _handle);
+        if (result == MDBResultCode.Success) {
+            Transaction.Disposing -= Dispose;
+            Transaction = txn;
+            Transaction.Disposing += Dispose;
+        }
+        return result;
     }
 
     /// <summary>
@@ -230,6 +241,7 @@ public struct LightningCursor : IDisposable {
             throw new InvalidOperationException("The LightningCursor was not disposed and cannot be reliably dealt with from the finalizer");
         }
 
+        Transaction.Disposing -= Dispose;
         mdb_cursor_close(_handle);
         _handle = IntPtr.Zero;
     }
