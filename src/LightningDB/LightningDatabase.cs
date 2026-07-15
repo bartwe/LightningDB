@@ -77,7 +77,18 @@ public sealed class LightningDatabase : IDisposable {
     /// </summary>
     public void Dispose() {
         GC.SuppressFinalize(this);
-        Dispose(true);
+        if (_handle == default) {
+            return;
+        }
+
+        IsOpened = false;
+        _pinnedConfig.Dispose();
+
+        if (_closeOnDispose) {
+            mdb_dbi_close(Environment.Handle(), _handle);
+        }
+
+        _handle = default;
     }
 
     public uint Handle() {
@@ -102,36 +113,4 @@ public sealed class LightningDatabase : IDisposable {
     public MDBResultCode Truncate(LightningTransaction transaction) {
         return mdb_drop(transaction.Handle(), _handle, false);
     }
-
-    /// <summary>
-    ///     Deallocates resources opened by the database.
-    /// </summary>
-    /// <param name="disposing">true if called from Dispose.</param>
-    void Dispose(bool disposing) {
-        if (_handle == default) {
-            return;
-        }
-
-        if (!disposing) {
-            throw new InvalidOperationException("The LightningDatabase was not disposed and cannot be reliably dealt with from the finalizer");
-        }
-
-        IsOpened = false;
-        _pinnedConfig.Dispose();
-
-        if (_closeOnDispose) {
-            mdb_dbi_close(Environment.Handle(), _handle);
-        }
-
-        _handle = default;
-    }
-
-#if DEBUG
-    ~LightningDatabase() {
-        if (_handle == default) {
-            return;
-        }
-        throw new("Leaked LightningDatabase instance.");
-    }
-#endif
 }

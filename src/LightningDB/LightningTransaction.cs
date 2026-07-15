@@ -22,7 +22,7 @@ public struct LightningTransaction : IDisposable {
     /// <param name="flags">Transaction open options.</param>
     internal LightningTransaction(LightningEnvironment environment, TransactionBeginFlags flags) {
         Environment = environment ?? throw new ArgumentNullException(nameof(environment));
-        IsReadOnly = flags == TransactionBeginFlags.ReadOnly;
+        IsReadOnly = (flags & TransactionBeginFlags.ReadOnly) != TransactionBeginFlags.None;
         State = LightningTransactionState.Active;
         mdb_txn_begin(environment.Handle(), IntPtr.Zero, flags, out _handle).ThrowOnError();
     }
@@ -261,7 +261,6 @@ public struct LightningTransaction : IDisposable {
     /// <summary>
     ///     Abort this transaction and deallocate all resources associated with it (including databases).
     /// </summary>
-    /// <param name="disposing">True if called from Dispose.</param>
     public void Dispose() {
         if (_handle == IntPtr.Zero) {
             return;

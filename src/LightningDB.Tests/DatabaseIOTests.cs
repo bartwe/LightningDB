@@ -17,6 +17,8 @@ namespace LightningDB.Tests {
         }
 
         public void Dispose() {
+            _db.Dispose();
+            _txn.Dispose();
             _env.Dispose();
         }
 
