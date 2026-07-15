@@ -21,7 +21,7 @@ namespace LightningDB.Tests {
         [Fact]
         public void CanCountTransactionEntries() {
             _env.RunTransactionScenario(
-                (tx, db) => {
+                (ref LightningTransaction tx, LightningDatabase db) => {
                     const int entriesCount = 10;
                     for (var i = 0; i < entriesCount; i++)
                         tx.Put(db, i.ToString(), i.ToString());
@@ -35,7 +35,7 @@ namespace LightningDB.Tests {
         [Fact]
         public void ReadOnlyTransactionShouldChangeStateOnRenew() {
             _env.RunTransactionScenario(
-                (tx, db) => {
+                (ref LightningTransaction tx, LightningDatabase db) => {
                     tx.Reset();
                     tx.Renew();
                     Assert.Equal(LightningTransactionState.Active, tx.State);
@@ -46,7 +46,7 @@ namespace LightningDB.Tests {
         [Fact]
         public void ReadOnlyTransactionShouldChangeStateOnReset() {
             _env.RunTransactionScenario(
-                (tx, db) => {
+                (ref LightningTransaction tx, LightningDatabase db) => {
                     tx.Reset();
                     Assert.Equal(LightningTransactionState.Reseted, tx.State);
                 }, transactionFlags: TransactionBeginFlags.ReadOnly
@@ -56,7 +56,7 @@ namespace LightningDB.Tests {
         [Fact]
         public void ResetTransactionAbortedOnDispose() {
             _env.RunTransactionScenario(
-                (tx, db) => {
+                (ref LightningTransaction tx, LightningDatabase db) => {
                     tx.Reset();
                     tx.Dispose();
                     Assert.Equal(LightningTransactionState.Aborted, tx.State);
@@ -65,9 +65,11 @@ namespace LightningDB.Tests {
         }
 
         [Fact]
-        public void TransactionShouldBeAbortedIfEnvironmentCloses() {
+        public void TransactionShouldBeAbortedBeforeEnvironmentCloses() {
             _env.RunTransactionScenario(
-                (tx, db) => {
+                (ref LightningTransaction tx, LightningDatabase db) => {
+                    db.Dispose();
+                    tx.Dispose();
                     _env.Dispose();
                     Assert.Equal(LightningTransactionState.Aborted, tx.State);
                 }
@@ -76,13 +78,13 @@ namespace LightningDB.Tests {
 
         [Fact]
         public void TransactionShouldBeCreated() {
-            _env.RunTransactionScenario((tx, db) => { Assert.Equal(LightningTransactionState.Active, tx.State); });
+            _env.RunTransactionScenario((ref LightningTransaction tx, LightningDatabase db) => { Assert.Equal(LightningTransactionState.Active, tx.State); });
         }
 
         [Fact]
         public void TransactionShouldChangeStateOnCommit() {
             _env.RunTransactionScenario(
-                (tx, db) => {
+                (ref LightningTransaction tx, LightningDatabase db) => {
                     tx.Commit();
                     Assert.Equal(LightningTransactionState.Commited, tx.State);
                 }
@@ -102,8 +104,8 @@ namespace LightningDB.Tests {
                 txnT.Commit();
             }
 
-            var txn = _env.BeginTransaction();
-            var db = txn.OpenDatabase(configuration: options);
+            using var txn = _env.BeginTransaction();
+            using var db = txn.OpenDatabase(configuration: options);
 
             var keysUnsorted = Enumerable.Range(1, 10000).OrderBy(x => Guid.NewGuid()).ToList();
             var keysSorted = keysUnsorted.ToArray();

@@ -121,8 +121,8 @@ namespace LightningDB.Tests {
             _env = new(_path, config);
             _env.Open();
             using (var tx = _env.BeginTransaction()) {
-                tx.OpenDatabase("db1", new() { Flags = DatabaseOpenFlags.Create });
-                tx.OpenDatabase("db2", new() { Flags = DatabaseOpenFlags.Create });
+                using var db1 = tx.OpenDatabase("db1", new() { Flags = DatabaseOpenFlags.Create });
+                using var db2 = tx.OpenDatabase("db2", new() { Flags = DatabaseOpenFlags.Create });
                 tx.Commit();
             }
             Assert.Equal(2, _env.MaxDatabases);

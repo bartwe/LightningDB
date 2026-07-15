@@ -5,6 +5,10 @@ using System.Text;
 
 namespace LightningDB.Tests {
     public static class TestHelperExtensions {
+        public delegate void CursorScenario(ref LightningTransaction transaction, LightningDatabase database, ref LightningCursor cursor);
+
+        public delegate void TransactionScenario(ref LightningTransaction transaction, LightningDatabase database);
+
         public static MDBResultCode Put(this LightningTransaction tx, LightningDatabase db, string key, string value) {
             var enc = Encoding.UTF8;
             return tx.Put(db, enc.GetBytes(key), enc.GetBytes(value));
@@ -38,17 +42,32 @@ namespace LightningDB.Tests {
             return list.Select((x, i) => new { Index = i, Value = x }).GroupBy(x => x.Index / parts).Select(x => x.Select(v => v.Value));
         }
 
-        public static void RunCursorScenario(this LightningEnvironment env, Action<LightningTransaction, LightningDatabase, LightningCursor> scenario, DatabaseOpenFlags flags = DatabaseOpenFlags.Create, TransactionBeginFlags transactionFlags = TransactionBeginFlags.None) {
-            using var tx = env.BeginTransaction(transactionFlags);
-            using var db = tx.OpenDatabase(configuration: new() { Flags = flags });
-            using var cursor = tx.CreateCursor(db);
-            scenario(tx, db, cursor);
+        public static void RunCursorScenario(this LightningEnvironment env, CursorScenario scenario, DatabaseOpenFlags flags = DatabaseOpenFlags.Create, TransactionBeginFlags transactionFlags = TransactionBeginFlags.None) {
+            var tx = env.BeginTransaction(transactionFlags);
+            try {
+                using var db = tx.OpenDatabase(configuration: new() { Flags = flags });
+                var cursor = tx.CreateCursor(db);
+                try {
+                    scenario(ref tx, db, ref cursor);
+                }
+                finally {
+                    cursor.Dispose();
+                }
+            }
+            finally {
+                tx.Dispose();
+            }
         }
 
-        public static void RunTransactionScenario(this LightningEnvironment env, Action<LightningTransaction, LightningDatabase> scenario, DatabaseOpenFlags flags = DatabaseOpenFlags.Create, TransactionBeginFlags transactionFlags = TransactionBeginFlags.None) {
-            using var tx = env.BeginTransaction(transactionFlags);
-            using var db = tx.OpenDatabase(configuration: new() { Flags = flags });
-            scenario(tx, db);
+        public static void RunTransactionScenario(this LightningEnvironment env, TransactionScenario scenario, DatabaseOpenFlags flags = DatabaseOpenFlags.Create, TransactionBeginFlags transactionFlags = TransactionBeginFlags.None) {
+            var tx = env.BeginTransaction(transactionFlags);
+            try {
+                using var db = tx.OpenDatabase(configuration: new() { Flags = flags });
+                scenario(ref tx, db);
+            }
+            finally {
+                tx.Dispose();
+            }
         }
     }
 }

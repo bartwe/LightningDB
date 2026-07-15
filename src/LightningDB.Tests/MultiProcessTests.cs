@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using Xunit;
@@ -17,11 +18,17 @@ namespace LightningDB.Tests {
             var name = _fileSystem.CreateNewDirectoryForTest();
             using var env = new LightningEnvironment(name);
             env.Open();
-            var otherProcessPath = Path.GetFullPath("../../../../SecondProcess/bin/Debug/net5.0/SecondProcess.exe");
+            var testOutputDirectory = new DirectoryInfo(AppContext.BaseDirectory);
+            var configurationDirectory = testOutputDirectory.Parent ?? throw new DirectoryNotFoundException($"Could not find the configuration directory above '{testOutputDirectory.FullName}'.");
+            var sourceDirectory = configurationDirectory.Parent?.Parent?.Parent ?? throw new DirectoryNotFoundException($"Could not find the source directory above '{testOutputDirectory.FullName}'.");
+            var executableName = OperatingSystem.IsWindows() ? "SecondProcess.exe" : "SecondProcess";
+            var otherProcessPath = Path.Combine(sourceDirectory.FullName, "SecondProcess", "bin", configurationDirectory.Name, testOutputDirectory.Name, executableName);
+            if (!File.Exists(otherProcessPath)) {
+                throw new FileNotFoundException("The multi-process test helper was not built for the active configuration.", otherProcessPath);
+            }
             using var process = new Process {
                 StartInfo = new() {
                     FileName = otherProcessPath,
-                    Arguments = $"{name}",
                     RedirectStandardError = true,
                     RedirectStandardInput = true,
                     RedirectStandardOutput = true,
@@ -30,6 +37,7 @@ namespace LightningDB.Tests {
                     WorkingDirectory = Directory.GetCurrentDirectory(),
                 },
             };
+            process.StartInfo.ArgumentList.Add(name);
 
             var expected = "world";
             using var tx = env.BeginTransaction();
