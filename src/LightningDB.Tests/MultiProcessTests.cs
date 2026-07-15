@@ -18,11 +18,8 @@ namespace LightningDB.Tests {
             var name = _fileSystem.CreateNewDirectoryForTest();
             using var env = new LightningEnvironment(name);
             env.Open();
-            var testOutputDirectory = new DirectoryInfo(AppContext.BaseDirectory);
-            var configurationDirectory = testOutputDirectory.Parent ?? throw new DirectoryNotFoundException($"Could not find the configuration directory above '{testOutputDirectory.FullName}'.");
-            var sourceDirectory = configurationDirectory.Parent?.Parent?.Parent ?? throw new DirectoryNotFoundException($"Could not find the source directory above '{testOutputDirectory.FullName}'.");
             var executableName = OperatingSystem.IsWindows() ? "SecondProcess.exe" : "SecondProcess";
-            var otherProcessPath = Path.Combine(sourceDirectory.FullName, "SecondProcess", "bin", configurationDirectory.Name, testOutputDirectory.Name, executableName);
+            var otherProcessPath = Path.Combine(AppContext.BaseDirectory, executableName);
             if (!File.Exists(otherProcessPath)) {
                 throw new FileNotFoundException("The multi-process test helper was not built for the active configuration.", otherProcessPath);
             }
