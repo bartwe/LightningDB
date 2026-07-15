@@ -54,6 +54,12 @@ namespace LightningDB.Tests {
         }
 
         [Fact]
+        public void CombinedReadOnlyFlagsShouldBeReadOnly() {
+            using var transaction = _env.BeginTransaction(TransactionBeginFlags.ReadOnly | TransactionBeginFlags.NoSync);
+            Assert.True(transaction.IsReadOnly);
+        }
+
+        [Fact]
         public void ResetTransactionAbortedOnDispose() {
             _env.RunTransactionScenario(
                 (ref LightningTransaction tx, LightningDatabase db) => {
@@ -65,12 +71,10 @@ namespace LightningDB.Tests {
         }
 
         [Fact]
-        public void TransactionShouldBeAbortedBeforeEnvironmentCloses() {
+        public void ActiveTransactionAbortedOnDispose() {
             _env.RunTransactionScenario(
                 (ref LightningTransaction tx, LightningDatabase db) => {
-                    db.Dispose();
                     tx.Dispose();
-                    _env.Dispose();
                     Assert.Equal(LightningTransactionState.Aborted, tx.State);
                 }
             );

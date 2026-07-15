@@ -131,23 +131,21 @@ namespace LightningDB.Tests {
         [Fact]
         public void TruncatingTheDatabase() {
             _env.Open();
-            _txn = _env.BeginTransaction();
-            using (var db = _txn.OpenDatabase()) {
-                _txn.Put(db, "hello", "world");
-                _txn.Commit();
+            using (var transaction = _env.BeginTransaction())
+            using (var database = transaction.OpenDatabase()) {
+                transaction.Put(database, "hello", "world");
+                transaction.Commit();
             }
-            _txn.Dispose();
-            _txn = _env.BeginTransaction();
-            using (var db = _txn.OpenDatabase()) {
-                db.Truncate(_txn);
-                _txn.Commit();
+            using (var transaction = _env.BeginTransaction())
+            using (var database = transaction.OpenDatabase()) {
+                database.Truncate(transaction);
+                transaction.Commit();
             }
-            _txn.Dispose();
-            _txn = _env.BeginTransaction();
-            using var finalDb = _txn.OpenDatabase();
-            var result = _txn.Get(finalDb, UTF8.GetBytes("hello"));
-
-            Assert.Equal(MDBResultCode.NotFound, result.resultCode);
+            using (var transaction = _env.BeginTransaction())
+            using (var database = transaction.OpenDatabase()) {
+                var result = transaction.Get(database, UTF8.GetBytes("hello"));
+                Assert.Equal(MDBResultCode.NotFound, result.resultCode);
+            }
         }
     }
 }

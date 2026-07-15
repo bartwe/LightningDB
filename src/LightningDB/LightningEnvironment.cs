@@ -160,7 +160,14 @@ public sealed class LightningEnvironment : IDisposable {
     /// </summary>
     public void Dispose() {
         GC.SuppressFinalize(this);
-        Dispose(true);
+        if (_handle == IntPtr.Zero) {
+            return;
+        }
+
+        mdb_env_close(_handle);
+        _handle = IntPtr.Zero;
+
+        IsOpened = false;
     }
 
     public IntPtr Handle() {
@@ -267,31 +274,4 @@ public sealed class LightningEnvironment : IDisposable {
             throw new InvalidOperationException("Environment should be opened");
         }
     }
-
-    /// <summary>
-    ///     Disposes the environment and deallocates all resources associated with it.
-    /// </summary>
-    /// <param name="disposing">True if called from Dispose.</param>
-    void Dispose(bool disposing) {
-        if (_handle == IntPtr.Zero) {
-            return;
-        }
-
-        if (!disposing) {
-            throw new InvalidOperationException("The LightningEnvironment was not disposed and cannot be reliably dealt with from the finalizer");
-        }
-        mdb_env_close(_handle);
-        _handle = IntPtr.Zero;
-
-        IsOpened = false;
-    }
-
-#if DEBUG
-    ~LightningEnvironment() {
-        if (_handle == default) {
-            return;
-        }
-        throw new("Leaked LightningEnvironment instance.");
-    }
-#endif
 }

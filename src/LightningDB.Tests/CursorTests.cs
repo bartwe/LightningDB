@@ -82,6 +82,7 @@ namespace LightningDB.Tests {
                     PopulateCursorValues(c);
                     c.Dispose();
                     // LMDB frees cursors during commit, so the managed cursor must relinquish ownership first.
+                    Assert.Equal(IntPtr.Zero, c.Handle());
                     var result = tx.Commit();
                     Assert.Equal(MDBResultCode.Success, result);
                 }

@@ -43,30 +43,30 @@ namespace LightningDB.Tests {
         }
 
         public static void RunCursorScenario(this LightningEnvironment env, CursorScenario scenario, DatabaseOpenFlags flags = DatabaseOpenFlags.Create, TransactionBeginFlags transactionFlags = TransactionBeginFlags.None) {
-            var tx = env.BeginTransaction(transactionFlags);
+            var transaction = env.BeginTransaction(transactionFlags);
             try {
-                using var db = tx.OpenDatabase(configuration: new() { Flags = flags });
-                var cursor = tx.CreateCursor(db);
+                using var database = transaction.OpenDatabase(configuration: new() { Flags = flags });
+                var cursor = transaction.CreateCursor(database);
                 try {
-                    scenario(ref tx, db, ref cursor);
+                    scenario(ref transaction, database, ref cursor);
                 }
                 finally {
                     cursor.Dispose();
                 }
             }
             finally {
-                tx.Dispose();
+                transaction.Dispose();
             }
         }
 
         public static void RunTransactionScenario(this LightningEnvironment env, TransactionScenario scenario, DatabaseOpenFlags flags = DatabaseOpenFlags.Create, TransactionBeginFlags transactionFlags = TransactionBeginFlags.None) {
-            var tx = env.BeginTransaction(transactionFlags);
+            var transaction = env.BeginTransaction(transactionFlags);
             try {
-                using var db = tx.OpenDatabase(configuration: new() { Flags = flags });
-                scenario(ref tx, db);
+                using var database = transaction.OpenDatabase(configuration: new() { Flags = flags });
+                scenario(ref transaction, database);
             }
             finally {
-                tx.Dispose();
+                transaction.Dispose();
             }
         }
     }
