@@ -13,8 +13,6 @@ public sealed class LightningEnvironment : IDisposable {
 
     IntPtr _handle;
 
-    internal event Action? Disposing;
-
     /// <summary>
     ///     Creates a new instance of LightningEnvironment.
     /// </summary>
@@ -282,8 +280,6 @@ public sealed class LightningEnvironment : IDisposable {
         if (!disposing) {
             throw new InvalidOperationException("The LightningEnvironment was not disposed and cannot be reliably dealt with from the finalizer");
         }
-
-        Disposing?.Invoke();
         mdb_env_close(_handle);
         _handle = IntPtr.Zero;
 

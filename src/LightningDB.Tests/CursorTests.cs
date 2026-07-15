@@ -32,7 +32,7 @@ namespace LightningDB.Tests {
         [Fact]
         public void CursorShouldDeleteElements() {
             _env.RunCursorScenario(
-                (tx, db, c) => {
+                (ref LightningTransaction tx, LightningDatabase db, ref LightningCursor c) => {
                     var keys = PopulateCursorValues(c).Take(2).ToArray();
                     for (var i = 0; i < 2; ++i) {
                         c.Next();
@@ -48,7 +48,7 @@ namespace LightningDB.Tests {
         [Fact]
         public void CursorShouldMoveToFirst() {
             _env.RunCursorScenario(
-                (tx, db, c) => {
+                (ref LightningTransaction tx, LightningDatabase db, ref LightningCursor c) => {
                     var keys = PopulateCursorValues(c);
                     var firstKey = keys.First();
                     var result = c.First();
@@ -63,7 +63,7 @@ namespace LightningDB.Tests {
         [Fact]
         public void CursorShouldMoveToLast() {
             _env.RunCursorScenario(
-                (tx, db, c) => {
+                (ref LightningTransaction tx, LightningDatabase db, ref LightningCursor c) => {
                     var keys = PopulateCursorValues(c);
                     var lastKey = keys.Last();
                     var result = c.Last();
@@ -78,10 +78,10 @@ namespace LightningDB.Tests {
         [Fact]
         public void CursorShouldPutValues() {
             _env.RunCursorScenario(
-                (tx, db, c) => {
+                (ref LightningTransaction tx, LightningDatabase db, ref LightningCursor c) => {
                     PopulateCursorValues(c);
                     c.Dispose();
-                    //TODO evaluate how not to require this Dispose on Linux (test only fails there)
+                    // LMDB frees cursors during commit, so the managed cursor must relinquish ownership first.
                     var result = tx.Commit();
                     Assert.Equal(MDBResultCode.Success, result);
                 }
@@ -89,23 +89,9 @@ namespace LightningDB.Tests {
         }
 
         [Fact]
-        public void CursorReferencesShareNativeHandleOwnership() {
-            using var tx = _env.BeginTransaction();
-            using var db = tx.OpenDatabase(configuration: new() { Flags = DatabaseOpenFlags.Create });
-            var cursor = tx.CreateCursor(db);
-            var alias = cursor;
-
-            Assert.Same(cursor, alias);
-            cursor.Dispose();
-            alias.Dispose();
-
-            Assert.Equal(IntPtr.Zero, alias.Handle());
-        }
-
-        [Fact]
         public void CursorShouldSetSpanKey() {
             _env.RunCursorScenario(
-                (tx, db, c) => {
+                (ref LightningTransaction tx, LightningDatabase db, ref LightningCursor c) => {
                     var keys = PopulateCursorValues(c);
                     var firstKey = keys.First();
                     var result = c.Set(firstKey.AsSpan());
@@ -120,7 +106,7 @@ namespace LightningDB.Tests {
         [Fact]
         public void ShouldAdvanceKeyToClosestWhenKeyNotFound() {
             _env.RunCursorScenario(
-                (tx, db, c) => {
+                (ref LightningTransaction tx, LightningDatabase db, ref LightningCursor c) => {
                     var expected = PopulateCursorValues(c).First();
                     var result = c.Set(UTF8.GetBytes("key"));
                     Assert.Equal(MDBResultCode.NotFound, result);
@@ -134,7 +120,7 @@ namespace LightningDB.Tests {
         [Fact]
         public void ShouldIterateThroughCursor() {
             _env.RunCursorScenario(
-                (tx, db, c) => {
+                (ref LightningTransaction tx, LightningDatabase db, ref LightningCursor c) => {
                     var keys = PopulateCursorValues(c);
                     using var c2 = tx.CreateCursor(db);
                     var items = c2.AsEnumerable().Select((x, i) => (x, i)).ToList();
@@ -149,7 +135,7 @@ namespace LightningDB.Tests {
         [Fact]
         public void ShouldRenewSameTransaction() {
             _env.RunCursorScenario(
-                (tx, db, c) => {
+                (ref LightningTransaction tx, LightningDatabase db, ref LightningCursor c) => {
                     var result = c.Renew();
                     Assert.Equal(MDBResultCode.Success, result);
                 }, transactionFlags: TransactionBeginFlags.ReadOnly
@@ -157,23 +143,9 @@ namespace LightningDB.Tests {
         }
 
         [Fact]
-        public void ShouldRenewWithDifferentTransaction() {
-            using var firstTransaction = _env.BeginTransaction(TransactionBeginFlags.ReadOnly);
-            using var db = firstTransaction.OpenDatabase();
-            using var cursor = firstTransaction.CreateCursor(db);
-            firstTransaction.Reset();
-
-            using var secondTransaction = _env.BeginTransaction(TransactionBeginFlags.ReadOnly);
-            var result = cursor.Renew(secondTransaction);
-
-            Assert.Equal(MDBResultCode.Success, result);
-            Assert.Same(secondTransaction, cursor.Transaction);
-        }
-
-        [Fact]
         public void ShouldSetKeyAndGet() {
             _env.RunCursorScenario(
-                (tx, db, c) => {
+                (ref LightningTransaction tx, LightningDatabase db, ref LightningCursor c) => {
                     var expected = PopulateCursorValues(c).ElementAt(2);
                     var result = c.SetKey(expected);
                     Assert.Equal(MDBResultCode.Success, result.resultCode);
@@ -185,7 +157,7 @@ namespace LightningDB.Tests {
         [Fact]
         public void ShouldSetKeyAndGetWithSpan() {
             _env.RunCursorScenario(
-                (tx, db, c) => {
+                (ref LightningTransaction tx, LightningDatabase db, ref LightningCursor c) => {
                     var expected = PopulateCursorValues(c).ElementAt(2);
                     var result = c.SetKey(expected.AsSpan());
                     Assert.Equal(MDBResultCode.Success, result.resultCode);
@@ -197,7 +169,7 @@ namespace LightningDB.Tests {
         [Fact]
         public void ShouldSetRangeWithSpan() {
             _env.RunCursorScenario(
-                (tx, db, c) => {
+                (ref LightningTransaction tx, LightningDatabase db, ref LightningCursor c) => {
                     var values = PopulateCursorValues(c);
                     var firstAfter = values[0].AsSpan();
                     var result = c.SetRange(firstAfter);

@@ -11,6 +11,7 @@ namespace LightningDB.Tests {
         }
 
         public void Dispose() {
+            _txn.Dispose();
             _env.Dispose();
         }
 
@@ -90,11 +91,11 @@ namespace LightningDB.Tests {
             _env.Open();
 
             using (var tx = _env.BeginTransaction()) {
-                var db = tx.OpenDatabase("customdb", new() { Flags = DatabaseOpenFlags.Create });
+                using var db = tx.OpenDatabase("customdb", new() { Flags = DatabaseOpenFlags.Create });
                 tx.Commit();
             }
             using (var tx = _env.BeginTransaction()) {
-                var db = tx.OpenDatabase();
+                using var db = tx.OpenDatabase();
                 using (var cursor = tx.CreateCursor(db)) {
                     var resultCode = cursor.Next();
                     Assert.Equal(MDBResultCode.Success, resultCode);
@@ -116,12 +117,12 @@ namespace LightningDB.Tests {
                 tx.Commit();
             }
             using (var tx = _env.BeginTransaction(TransactionBeginFlags.ReadOnly)) {
-                var db = tx.OpenDatabase("custom");
+                using var db = tx.OpenDatabase("custom");
                 var result = tx.Get(db, "hello");
                 Assert.Equal("world", result);
             }
             using (var tx = _env.BeginTransaction(TransactionBeginFlags.ReadOnly)) {
-                var db = tx.OpenDatabase("custom");
+                using var db = tx.OpenDatabase("custom");
                 var result = tx.Get(db, "hello");
                 Assert.Equal("world", result);
             }
@@ -131,19 +132,20 @@ namespace LightningDB.Tests {
         public void TruncatingTheDatabase() {
             _env.Open();
             _txn = _env.BeginTransaction();
-            var db = _txn.OpenDatabase();
-
-            _txn.Put(db, "hello", "world");
-            _txn.Commit();
+            using (var db = _txn.OpenDatabase()) {
+                _txn.Put(db, "hello", "world");
+                _txn.Commit();
+            }
             _txn.Dispose();
             _txn = _env.BeginTransaction();
-            db = _txn.OpenDatabase();
-            db.Truncate(_txn);
-            _txn.Commit();
+            using (var db = _txn.OpenDatabase()) {
+                db.Truncate(_txn);
+                _txn.Commit();
+            }
             _txn.Dispose();
             _txn = _env.BeginTransaction();
-            db = _txn.OpenDatabase();
-            var result = _txn.Get(db, UTF8.GetBytes("hello"));
+            using var finalDb = _txn.OpenDatabase();
+            var result = _txn.Get(finalDb, UTF8.GetBytes("hello"));
 
             Assert.Equal(MDBResultCode.NotFound, result.resultCode);
         }

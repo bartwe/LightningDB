@@ -6,15 +6,13 @@ namespace LightningDB;
 /// <summary>
 ///     Represents a transaction.
 /// </summary>
-public sealed class LightningTransaction : IDisposable {
+public struct LightningTransaction : IDisposable {
     /// <summary>
     ///     Default options used to begin new transactions.
     /// </summary>
     public const TransactionBeginFlags DefaultTransactionBeginFlags = TransactionBeginFlags.None;
 
     IntPtr _handle;
-
-    internal event Action? Disposing;
 
     /// <summary>
     ///     Current transaction state.
@@ -42,13 +40,11 @@ public sealed class LightningTransaction : IDisposable {
         IsReadOnly = flags == TransactionBeginFlags.ReadOnly;
         State = LightningTransactionState.Active;
         mdb_txn_begin(environment.Handle(), IntPtr.Zero, flags, out _handle).ThrowOnError();
-        Environment.Disposing += Dispose;
     }
 
     public IntPtr Handle() {
         return _handle;
     }
-
 
     /// <summary>
     ///     Opens a database in context of this transaction.
@@ -232,7 +228,6 @@ public sealed class LightningTransaction : IDisposable {
         if (State != LightningTransactionState.Active) {
             throw new InvalidOperationException("Transaction should be active");
         }
-        Disposing?.Invoke();
         State = LightningTransactionState.Commited;
         return mdb_txn_commit(_handle);
     }
@@ -244,7 +239,6 @@ public sealed class LightningTransaction : IDisposable {
     /// </summary>
     public void Abort() {
         if (State is LightningTransactionState.Active or LightningTransactionState.Reseted) {
-            Disposing?.Invoke();
             State = LightningTransactionState.Aborted;
             mdb_txn_abort(_handle);
         }
@@ -271,8 +265,6 @@ public sealed class LightningTransaction : IDisposable {
         if (_handle == IntPtr.Zero) {
             return;
         }
-
-        Environment.Disposing -= Dispose;
 
         if (State is LightningTransactionState.Active or LightningTransactionState.Reseted) {
             Abort();
