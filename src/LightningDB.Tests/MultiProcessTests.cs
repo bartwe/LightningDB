@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using Xunit;
@@ -17,7 +18,17 @@ namespace LightningDB.Tests {
             var name = _fileSystem.CreateNewDirectoryForTest();
             using var env = new LightningEnvironment(name);
             env.Open();
-            var otherProcessPath = Path.GetFullPath("../../../../SecondProcess/bin/Debug/net5.0/SecondProcess.exe");
+            var testOutputDirectory = new DirectoryInfo(AppContext.BaseDirectory);
+            var testBinDirectory = testOutputDirectory;
+            while (testBinDirectory.Name != "bin") {
+                testBinDirectory = testBinDirectory.Parent ?? throw new InvalidOperationException("Could not resolve the test build output root.");
+            }
+            var sourceDirectory = testBinDirectory.Parent?.Parent ?? throw new InvalidOperationException("Could not resolve the source directory.");
+            var relativeOutputPath = Path.GetRelativePath(testBinDirectory.FullName, testOutputDirectory.FullName);
+            var otherProcessProjectDirectory = Path.Combine(sourceDirectory.FullName, "SecondProcess");
+            var otherProcessOutputDirectory = Path.Combine(otherProcessProjectDirectory, "bin", relativeOutputPath);
+            var otherProcessFileName = OperatingSystem.IsWindows() ? "SecondProcess.exe" : "SecondProcess";
+            var otherProcessPath = Path.Combine(otherProcessOutputDirectory, otherProcessFileName);
             using var process = new Process {
                 StartInfo = new() {
                     FileName = otherProcessPath,

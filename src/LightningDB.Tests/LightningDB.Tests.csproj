@@ -7,10 +7,12 @@
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <IsTestProject>true</IsTestProject>
     <LightningDBTargetRuntimeRelativePath>.\</LightningDBTargetRuntimeRelativePath>
+    <Configurations>DebugLinuxArm32;DebugLinuxArm64;DebugLinuxX64;DebugMacOSX64;DebugMacOSArm64;DebugWindowsX64;DebugWindowsArm64</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\LightningDB\LightningDB.csproj" />
+    <ProjectReference Include="..\SecondProcess\SecondProcess.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>
