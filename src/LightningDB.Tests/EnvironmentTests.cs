@@ -116,6 +116,25 @@ namespace LightningDB.Tests {
         }
 
         [Fact]
+        public void NoThreadLocalStorageAllowsReadOnlyTransactionCleanupOnAnotherThread() {
+            _env = new(_path);
+            _env.Open(EnvironmentOpenFlags.NoThreadLocalStorage);
+            var transaction = _env.BeginTransaction(TransactionBeginFlags.ReadOnly);
+            var creatingThreadId = Environment.CurrentManagedThreadId;
+            var cleanupThreadId = 0;
+
+            System.Threading.Tasks.Task.Run(
+                () => {
+                    cleanupThreadId = Environment.CurrentManagedThreadId;
+                    transaction.Dispose();
+                }
+            ).GetAwaiter().GetResult();
+
+            Assert.NotEqual(creatingThreadId, cleanupThreadId);
+            Assert.Equal(IntPtr.Zero, transaction.Handle());
+        }
+
+        [Fact]
         public void MaxDatabasesWorksThroughConfigIssue62() {
             var config = new EnvironmentConfiguration { MaxDatabases = 2 };
             _env = new(_path, config);

@@ -10,6 +10,15 @@
       <ProjectReference Include="..\LightningDB\LightningDB.csproj" />
     </ItemGroup>
 
+    <Target Name="AddSecondProcessAssemblyToCopyItems"
+            BeforeTargets="GetCopyToOutputDirectoryItems;_GetCopyToOutputDirectoryItemsFromThisProject">
+      <ItemGroup>
+        <AllItemsFullPathWithTargetPath Include="$(TargetPath)"
+                                        TargetPath="$(TargetFileName)"
+                                        CopyToOutputDirectory="PreserveNewest" />
+      </ItemGroup>
+    </Target>
+
     <Import Project="..\LightningDB\LightningDB.targets" />
 
 </Project>

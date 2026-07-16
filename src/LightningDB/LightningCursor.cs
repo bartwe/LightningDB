@@ -220,24 +220,12 @@ public struct LightningCursor : IDisposable {
     /// <summary>
     ///     Closes the cursor and deallocates all resources associated with it.
     /// </summary>
-    /// <param name="disposing">True if called from Dispose.</param>
-    void Dispose(bool disposing) {
+    public void Dispose() {
         if (_handle == IntPtr.Zero) {
             return;
         }
 
-        if (!disposing) {
-            throw new InvalidOperationException("The LightningCursor was not disposed and cannot be reliably dealt with from the finalizer");
-        }
-
         mdb_cursor_close(_handle);
         _handle = IntPtr.Zero;
-    }
-
-    /// <summary>
-    ///     Closes the cursor and deallocates all resources associated with it.
-    /// </summary>
-    public void Dispose() {
-        Dispose(true);
     }
 }
