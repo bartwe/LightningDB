@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace LightningDB.Benchmarks {
     /// <summary>
@@ -64,7 +64,7 @@ namespace LightningDB.Benchmarks {
 
         static byte[] CopyToArray(int keyValue) {
             var key = new byte[4];
-            MemoryMarshal.Write(key, ref keyValue);
+            BinaryPrimitives.WriteInt32BigEndian(key, keyValue);
             return key;
         }
     }
