@@ -29,18 +29,23 @@ namespace LightningDB.Tests {
             return keys;
         }
 
-        [Fact]
-        public void CursorShouldDeleteElements() {
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(5)]
+        public void CursorShouldDeleteElements(int deleteCount) {
             _env.RunCursorScenario(
                 (ref LightningTransaction tx, LightningDatabase db, ref LightningCursor c) => {
-                    var keys = PopulateCursorValues(c).Take(2).ToArray();
-                    for (var i = 0; i < 2; ++i) {
-                        c.Next();
-                        c.Delete();
+                    var keys = PopulateCursorValues(c);
+                    foreach (var key in keys.Take(deleteCount)) {
+                        Assert.Equal(MDBResultCode.Success, c.Set(key));
+                        Assert.Equal(MDBResultCode.Success, c.Delete());
                     }
 
                     using var c2 = tx.CreateCursor(db);
-                    Assert.DoesNotContain(c2.AsEnumerable(), x => keys.Any(k => x.Item1.AsSpan().ToArray() == k));
+                    var remainingKeys = c2.AsEnumerable().Select(x => x.Item1.AsSpan().ToArray()).ToArray();
+                    Assert.Equal(keys.Skip(deleteCount), remainingKeys);
                 }
             );
         }
